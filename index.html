@@ -1,0 +1,2961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accounting Mastery Lab</title>
+  <style>
+    :root {
+      --bg: #f6f1e8;
+      --bg-soft: #fbf8f3;
+      --card: #fffdf9;
+      --text: #1f2a30;
+      --muted: #5a686f;
+      --border: #ddd1c3;
+      --accent: #6f948c;
+      --accent-soft: #dfece8;
+      --accent-strong: #4f6f68;
+      --correct: #dff1e4;
+      --incorrect: #f7e1dd;
+      --warning: #f8efcf;
+      --shadow: 0 24px 60px rgba(31, 42, 48, 0.1);
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+      --focus: 0 0 0 4px rgba(111, 148, 140, 0.24);
+      --max: 920px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Avenir Next", Avenir, "Lexend", "Atkinson Hyperlegible", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(111, 148, 140, 0.11), transparent 28%),
+        radial-gradient(circle at top right, rgba(221, 209, 195, 0.5), transparent 24%),
+        linear-gradient(180deg, #fbf8f3 0%, var(--bg) 100%);
+      color: var(--text);
+      line-height: 1.55;
+      letter-spacing: 0.01em;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: inherit;
+    }
+
+    button:focus-visible {
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
+    .app {
+      min-height: 100vh;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      width: min(var(--max), 100%);
+      margin: 0 auto 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      color: var(--muted);
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .quiet-btn,
+    .icon-btn,
+    .ghost-btn,
+    .primary-btn,
+    .choice-btn,
+    .micro-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 253, 249, 0.84);
+      color: var(--muted);
+      min-height: 46px;
+      transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease;
+    }
+
+    .quiet-btn,
+    .ghost-btn {
+      padding: 0.78rem 1rem;
+    }
+
+    .icon-btn {
+      width: 46px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+    }
+
+    .primary-btn {
+      background: var(--accent);
+      color: #fff;
+      border-color: transparent;
+      padding: 0.95rem 1.3rem;
+      font-weight: 700;
+      min-width: 180px;
+      text-align: center;
+    }
+
+    .ghost-btn {
+      color: var(--accent-strong);
+      background: var(--accent-soft);
+      border-color: rgba(111, 148, 140, 0.25);
+      font-weight: 700;
+    }
+
+    .danger-btn {
+      background: var(--incorrect);
+      color: #864a43;
+    }
+
+    .quiet-btn:hover:not(:disabled),
+    .icon-btn:hover:not(:disabled),
+    .ghost-btn:hover:not(:disabled),
+    .primary-btn:hover:not(:disabled),
+    .choice-btn:hover:not(:disabled),
+    .micro-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    .stage {
+      width: min(var(--max), 100%);
+      margin: 0 auto;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: clamp(28px, 4vw, 44px);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card,
+    .question-card,
+    .feedback-card,
+    .summary-card {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .module-label,
+    .progress-line,
+    .eyebrow {
+      color: var(--muted);
+      font-size: 0.98rem;
+      letter-spacing: 0.04em;
+    }
+
+    .meta-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    .hero-title,
+    .intro-title,
+    .question-title,
+    .feedback-title,
+    .summary-title {
+      font-size: clamp(2.2rem, 5vw, 3.25rem);
+      line-height: 1.14;
+      max-width: 17ch;
+      text-wrap: balance;
+    }
+
+    .hero-copy,
+    .intro-copy,
+    .feedback-copy,
+    .summary-copy,
+    .feedback-list li,
+    .statement-note,
+    .overlay-card p {
+      font-size: 1.28rem;
+      max-width: 36ch;
+      color: var(--text);
+    }
+
+    .hero-copy,
+    .intro-copy,
+    .feedback-copy,
+    .summary-copy,
+    .statement-note,
+    .overlay-card p {
+      color: var(--text);
+    }
+
+    .hero-copy,
+    .intro-copy {
+      color: var(--muted);
+    }
+
+    .welcome-list {
+      display: grid;
+      gap: 12px;
+      padding-left: 1.2rem;
+      margin: 0;
+    }
+
+    .question-stack {
+      display: grid;
+      gap: 20px;
+    }
+
+    .scenario-card {
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(111, 148, 140, 0.15);
+      background: linear-gradient(180deg, #fffdf8 0%, #f8f2e9 100%);
+      padding: clamp(22px, 4vw, 34px);
+    }
+
+    .question-title {
+      font-size: clamp(2.45rem, 5.2vw, 3.5rem);
+      max-width: 16ch;
+    }
+
+    .question-support {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .choice-list,
+    .micro-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .choice-btn,
+    .micro-btn {
+      width: 100%;
+      min-height: 82px;
+      padding: 1rem 1.1rem;
+      border-radius: var(--radius-md);
+      background: var(--card);
+      color: var(--text);
+      text-align: left;
+      font-size: clamp(1.4rem, 2.8vw, 1.85rem);
+      line-height: 1.34;
+    }
+
+    .choice-btn.selected {
+      background: var(--accent-soft);
+      border-color: rgba(111, 148, 140, 0.45);
+    }
+
+    .choice-btn.correct {
+      background: var(--correct);
+      border-color: rgba(80, 130, 96, 0.45);
+    }
+
+    .choice-btn.incorrect {
+      background: var(--incorrect);
+      border-color: rgba(181, 98, 86, 0.4);
+    }
+
+    .micro-btn.correct {
+      background: var(--correct);
+      border-color: rgba(80, 130, 96, 0.45);
+    }
+
+    .result-pill {
+      align-self: flex-start;
+      padding: 0.55rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .result-pill.correct {
+      background: var(--correct);
+      color: #27553a;
+    }
+
+    .result-pill.incorrect {
+      background: var(--incorrect);
+      color: #864a43;
+    }
+
+    .feedback-section {
+      display: grid;
+      gap: 10px;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: #fffdfa;
+    }
+
+    .feedback-section h3 {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .feedback-list {
+      margin: 0;
+      padding-left: 1.15rem;
+      display: grid;
+      gap: 10px;
+    }
+
+    .feedback-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .micro-panel {
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .micro-prompt {
+      font-size: clamp(1.7rem, 3vw, 2.2rem);
+      max-width: 20ch;
+      line-height: 1.2;
+    }
+
+    .micro-help {
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .statement-table {
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      background: #fffcf7;
+    }
+
+    .statement-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .statement-subtitle {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+
+    .statement-header {
+      margin-top: 10px;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+
+    .statement-line {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: baseline;
+      border-radius: 12px;
+      padding: 8px 10px;
+    }
+
+    .statement-line.highlight {
+      background: var(--warning);
+      font-weight: 700;
+    }
+
+    .statement-line.total {
+      border-top: 1px solid #e6ddcf;
+      padding-top: 10px;
+      font-weight: 800;
+    }
+
+    .summary-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .summary-box {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: #fffdfa;
+      display: grid;
+      gap: 10px;
+    }
+
+    .summary-box h3 {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(31, 42, 48, 0.18);
+      backdrop-filter: blur(8px);
+      padding: 20px;
+      z-index: 20;
+    }
+
+    .overlay.open {
+      display: flex;
+    }
+
+    .overlay-card {
+      width: min(840px, 100%);
+      max-height: min(88vh, 940px);
+      overflow: auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 18px;
+    }
+
+    .overlay-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .overlay-title {
+      font-size: 1.6rem;
+    }
+
+    .close-btn {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255, 253, 249, 0.9);
+      color: var(--muted);
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: #e8dfd2;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #9db5af);
+      width: 0%;
+    }
+
+    .module-progress {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: #fffdfa;
+    }
+
+    .concept-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: var(--bg-soft);
+      border: 1px solid #eee3d6;
+    }
+
+    .concept-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        padding: 16px;
+      }
+
+      .feedback-copy,
+      .summary-copy,
+      .feedback-list li,
+      .statement-note,
+      .overlay-card p {
+        font-size: 1.1rem;
+      }
+
+      .choice-btn,
+      .micro-btn {
+        min-height: 72px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">Accounting Mastery Lab</div>
+      <div class="top-actions">
+        <button id="listenBtn" class="quiet-btn" type="button">Listen</button>
+        <button id="progressBtn" class="icon-btn" type="button" aria-label="Open progress">◔</button>
+        <button id="settingsBtn" class="icon-btn" type="button" aria-label="Open settings">⋯</button>
+      </div>
+    </header>
+
+    <main class="stage">
+      <section id="welcomeScreen" class="screen active">
+        <article class="card hero-card">
+          <div class="eyebrow">BrightBean Coffee Cart</div>
+          <h1 class="hero-title">Accounting Mastery Lab</h1>
+          <p class="hero-copy">This is an interactive accounting learning lab. You will learn one idea at a time. After every answer, you will get required teaching feedback. You must master each concept before moving forward. This is not about speed. It is about understanding.</p>
+          <ul class="welcome-list hero-copy">
+            <li>One scenario at a time</li>
+            <li>Required feedback after every answer</li>
+            <li>Micro checks before you continue</li>
+            <li>New modules unlock after mastery</li>
+          </ul>
+          <div>
+            <button id="startBtn" class="primary-btn" type="button">Start Learning</button>
+          </div>
+        </article>
+      </section>
+
+      <section id="moduleIntroScreen" class="screen">
+        <article class="card hero-card">
+          <div id="introModuleLabel" class="module-label"></div>
+          <h2 id="introTitle" class="intro-title"></h2>
+          <p id="introWhy" class="intro-copy"></p>
+          <p id="introWatch" class="intro-copy"></p>
+          <div>
+            <button id="beginModuleBtn" class="primary-btn" type="button">Begin Module</button>
+          </div>
+        </article>
+      </section>
+
+      <section id="questionScreen" class="screen">
+        <article class="card question-card">
+          <div class="meta-line">
+            <div id="questionModuleLabel" class="module-label"></div>
+            <div id="questionProgressLine" class="progress-line"></div>
+          </div>
+          <div class="scenario-card">
+            <h2 id="questionTitle" class="question-title"></h2>
+          </div>
+          <div class="question-support">
+            <button id="viewBalanceBtn" class="ghost-btn hidden" type="button">View Balance Sheet</button>
+            <button id="viewIncomeBtn" class="ghost-btn hidden" type="button">View Income Statement</button>
+            <button id="viewExampleBtn" class="ghost-btn hidden" type="button">Show Example</button>
+          </div>
+          <div id="choiceList" class="choice-list"></div>
+        </article>
+      </section>
+
+      <section id="feedbackScreen" class="screen">
+        <article class="card feedback-card">
+          <div id="resultPill" class="result-pill"></div>
+          <h2 id="feedbackTitle" class="feedback-title"></h2>
+          <div class="feedback-grid">
+            <section class="feedback-section">
+              <h3>Correct Answer</h3>
+              <p id="feedbackCorrect" class="feedback-copy"></p>
+            </section>
+            <section class="feedback-section">
+              <h3>Why It Is Correct</h3>
+              <p id="feedbackWhy" class="feedback-copy"></p>
+            </section>
+            <section class="feedback-section">
+              <h3>Why The Other Choices Are Wrong</h3>
+              <ul id="feedbackWrongList" class="feedback-list"></ul>
+            </section>
+            <section class="feedback-section">
+              <h3>Statement Impact</h3>
+              <p id="feedbackStatementImpact" class="feedback-copy"></p>
+            </section>
+            <section class="feedback-section">
+              <h3>Transfer Example</h3>
+              <p id="feedbackTransfer" class="feedback-copy"></p>
+            </section>
+            <section id="feedbackStatementWrap" class="feedback-section hidden">
+              <h3>Statement View</h3>
+              <div id="feedbackStatementView" class="statement-table"></div>
+              <p id="feedbackStatementNote" class="statement-note"></p>
+            </section>
+          </div>
+          <div class="micro-panel">
+            <h3>Required Micro Check</h3>
+            <p id="microPrompt" class="micro-prompt"></p>
+            <div id="microList" class="micro-list"></div>
+            <p id="microHelp" class="micro-help">Answer the micro check to unlock Continue.</p>
+            <div>
+              <button id="continueBtn" class="primary-btn" type="button" disabled>Continue</button>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section id="moduleSummaryScreen" class="screen">
+        <article class="card summary-card">
+          <div id="moduleSummaryLabel" class="module-label"></div>
+          <h2 id="moduleSummaryTitle" class="summary-title"></h2>
+          <p id="moduleSummaryCopy" class="summary-copy"></p>
+          <div class="summary-grid">
+            <section class="summary-box">
+              <h3>Concept Mastery</h3>
+              <p id="moduleSummaryConcepts" class="summary-copy"></p>
+            </section>
+            <section class="summary-box">
+              <h3>What To Watch Next</h3>
+              <p id="moduleSummaryNext" class="summary-copy"></p>
+            </section>
+          </div>
+          <div>
+            <button id="moduleSummaryBtn" class="primary-btn" type="button">Continue</button>
+          </div>
+        </article>
+      </section>
+
+      <section id="finalSummaryScreen" class="screen">
+        <article class="card summary-card">
+          <div class="module-label">Final Mastery Summary</div>
+          <h2 class="summary-title">You completed Accounting Mastery Lab.</h2>
+          <p id="finalSummaryCopy" class="summary-copy"></p>
+          <div class="summary-grid">
+            <section class="summary-box">
+              <h3>Mastered Concepts</h3>
+              <p id="finalSummaryConcepts" class="summary-copy"></p>
+            </section>
+            <section class="summary-box">
+              <h3>Anchor Reminder</h3>
+              <p class="summary-copy">The balance sheet is a snapshot <strong>as of one date</strong>. The income statement shows performance <strong>over a period</strong>. Net income can flow into retained earnings.</p>
+            </section>
+            <section class="summary-box">
+              <h3>Accuracy</h3>
+              <p id="finalSummaryAccuracy" class="summary-copy"></p>
+            </section>
+          </div>
+          <div>
+            <button id="restartBtn" class="primary-btn" type="button">Start Again</button>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div id="statementOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="statementOverlayTitle">
+    <div class="overlay-card">
+      <div class="overlay-head">
+        <h2 id="statementOverlayTitle" class="overlay-title">Statement View</h2>
+        <button class="close-btn" data-close="statementOverlay" type="button">×</button>
+      </div>
+      <div id="statementOverlayContent"></div>
+    </div>
+  </div>
+
+  <div id="progressOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="progressOverlayTitle">
+    <div class="overlay-card">
+      <div class="overlay-head">
+        <h2 id="progressOverlayTitle" class="overlay-title">Progress</h2>
+        <button class="close-btn" data-close="progressOverlay" type="button">×</button>
+      </div>
+      <div id="progressOverlayContent"></div>
+    </div>
+  </div>
+
+  <div id="settingsOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="settingsOverlayTitle">
+    <div class="overlay-card">
+      <div class="overlay-head">
+        <h2 id="settingsOverlayTitle" class="overlay-title">Settings</h2>
+        <button class="close-btn" data-close="settingsOverlay" type="button">×</button>
+      </div>
+      <div class="module-progress">
+        <h3>Student Reset</h3>
+        <p>Restart your own progress on this browser.</p>
+        <div><button id="studentResetBtn" class="ghost-btn" type="button">Student Reset</button></div>
+      </div>
+      <div class="module-progress">
+        <h3>Teacher Reset</h3>
+        <p>Clear all saved mastery and question history on this browser.</p>
+        <div><button id="teacherResetBtn" class="ghost-btn danger-btn" type="button">Teacher Reset</button></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "accounting-mastery-lab-focused-v1";
+
+    const anchorStatements = {
+      balance: {
+        title: "BrightBean Coffee Cart Balance Sheet",
+        subtitle: "As of December 31, 2026",
+        sections: [
+          {
+            title: "Assets",
+            lines: [
+              { key: "cash", label: "Cash", value: 12000 },
+              { key: "accounts_receivable", label: "Accounts Receivable", value: 4000 },
+              { key: "inventory", label: "Inventory", value: 6000 },
+              { key: "equipment", label: "Equipment", value: 18000 }
+            ],
+            total: { key: "total_assets", label: "Total Assets", value: 40000 }
+          },
+          {
+            title: "Liabilities",
+            lines: [
+              { key: "accounts_payable", label: "Accounts Payable", value: 5000 },
+              { key: "unearned_revenue", label: "Unearned Revenue", value: 3000 },
+              { key: "long_term_loan", label: "Long Term Loan", value: 12000 }
+            ],
+            total: { key: "total_liabilities", label: "Total Liabilities", value: 20000 }
+          },
+          {
+            title: "Equity",
+            lines: [
+              { key: "owner_capital", label: "Owner Capital", value: 12000 },
+              { key: "retained_earnings", label: "Retained Earnings", value: 8000 }
+            ],
+            total: { key: "total_equity", label: "Total Equity", value: 20000 }
+          }
+        ],
+        closingTotal: { key: "total_liabilities_equity", label: "Total Liabilities and Equity", value: 40000 }
+      },
+      income: {
+        title: "BrightBean Coffee Cart Income Statement",
+        subtitle: "For the Year Ended December 31, 2026",
+        sections: [
+          {
+            title: "",
+            lines: [
+              { key: "sales_revenue", label: "Sales Revenue", value: 52000 },
+              { key: "cost_of_ingredients", label: "Cost of Ingredients and Cups", value: 18000 },
+              { key: "wages_expense", label: "Wages Expense", value: 12000 },
+              { key: "rent_expense", label: "Rent Expense", value: 8000 },
+              { key: "utilities_expense", label: "Utilities Expense", value: 2000 },
+              { key: "interest_expense", label: "Interest Expense", value: 1000 },
+              { key: "income_tax_expense", label: "Income Tax Expense", value: 3000 }
+            ],
+            total: { key: "net_income", label: "Net Income", value: 8000 }
+          }
+        ]
+      }
+    };
+
+    const modules = [
+      {
+        id: "language",
+        title: "1. The Language of Business",
+        introTitle: "Start with the basic language accountants use.",
+        introWhy: "This module helps you name the big ideas before you place them on statements.",
+        introWatch: "Watch for clue words like <strong>earned</strong>, <strong>owed</strong>, <strong>as of one date</strong>, and <strong>over a period</strong>.",
+        concepts: ["accounting_basics", "bookkeeping", "financial_accounting", "revenue", "expense", "net_income", "accounting_equation"]
+      },
+      {
+        id: "balance",
+        title: "2. Balance Sheet Lab",
+        introTitle: "Learn how the balance sheet organizes what BrightBean has and owes.",
+        introWhy: "The balance sheet is a snapshot of resources, obligations, and equity <strong>as of one date</strong>.",
+        introWatch: "Watch for the difference between <strong>current</strong> and <strong>long term</strong> items.",
+        concepts: ["asset", "liability", "equity", "snapshot_date", "current_asset", "long_term_asset", "current_liability", "long_term_liability", "accounts_receivable", "unearned_revenue"]
+      },
+      {
+        id: "income",
+        title: "3. Income Statement Lab",
+        introTitle: "Track what BrightBean earned and what it spent.",
+        introWhy: "The income statement explains performance <strong>over a period</strong>, not on one exact date.",
+        introWatch: "Watch for whether a line shows money <strong>earned</strong> or cost <strong>incurred</strong>.",
+        concepts: ["income_period", "revenue", "expense", "net_income", "statement_classification"]
+      },
+      {
+        id: "bridge",
+        title: "4. Statement Bridge",
+        introTitle: "See how the statements connect instead of treating them like separate pages.",
+        introWhy: "Good accounting thinking means knowing where one number travels next.",
+        introWatch: "Watch for the path from revenue and expense to <strong>net income</strong> and then to <strong>retained earnings</strong>.",
+        concepts: ["retained_earnings", "statement_relationship", "net_income_flow", "accounting_equation"]
+      },
+      {
+        id: "revenue_recognition",
+        title: "5. Revenue Recognition Studio",
+        introTitle: "Learn when revenue is actually earned.",
+        introWhy: "Students often confuse cash collection with earned revenue. This module separates those ideas clearly.",
+        introWatch: "Watch for clue words like <strong>received in advance</strong>, <strong>not yet delivered</strong>, and <strong>control transfers</strong>.",
+        concepts: ["revenue_recognition", "control_transfer", "accounts_receivable", "unearned_revenue"]
+      },
+      {
+        id: "cash_flow",
+        title: "6. Cash Flow Statement",
+        introTitle: "Explore the optional advanced module on cash movement.",
+        introWhy: "Cash flow asks a different question: where did cash come from and where did it go?",
+        introWatch: "Watch for the difference between profit and cash timing.",
+        concepts: ["cash_flow_basics", "operating_cash_flow", "investing_cash_flow", "financing_cash_flow"],
+        optional: true
+      }
+    ];
+
+    const conceptLabels = {
+      accounting_basics: "Accounting basics",
+      bookkeeping: "Bookkeeping",
+      financial_accounting: "Financial accounting",
+      revenue: "Revenue",
+      expense: "Expense",
+      net_income: "Net income",
+      accounting_equation: "Accounting equation",
+      asset: "Asset",
+      liability: "Liability",
+      equity: "Equity",
+      snapshot_date: "Snapshot at one date",
+      current_asset: "Current asset",
+      long_term_asset: "Long-term asset",
+      current_liability: "Current liability",
+      long_term_liability: "Long-term liability",
+      accounts_receivable: "Accounts receivable",
+      unearned_revenue: "Unearned revenue",
+      income_period: "Performance over a period",
+      statement_classification: "Statement classification",
+      retained_earnings: "Retained earnings",
+      statement_relationship: "Statement relationship",
+      net_income_flow: "Net income into retained earnings",
+      revenue_recognition: "Revenue recognition",
+      control_transfer: "Control transfer",
+      cash_flow_basics: "Cash flow basics",
+      operating_cash_flow: "Operating cash flow",
+      investing_cash_flow: "Investing cash flow",
+      financing_cash_flow: "Financing cash flow"
+    };
+
+    const questionBank = [
+      {
+        id: "q1",
+        module: "language",
+        prompt: "BrightBean serves customers, pays bills, and reports results. What is <strong>accounting</strong> in that setting?",
+        choices: [
+          "A system for organizing and communicating financial information",
+          "A list of coffee drink recipes",
+          "A schedule of barista shifts",
+          "A method for counting only cash"
+        ],
+        correctIndex: 0,
+        concepts: ["accounting_basics"],
+        statementRefs: ["balance", "income"],
+        highlightLines: ["cash", "sales_revenue"],
+        whyCorrect: "Accounting is the full system for identifying, measuring, and communicating financial information.",
+        wrongWhy: [
+          "Recipes matter for operations, but they are not accounting.",
+          "Shift schedules help operations, but they do not explain financial results.",
+          "Accounting includes more than cash. It also includes items like receivables and payables."
+        ],
+        statementImpact: "Accounting helps create both the balance sheet and the income statement.",
+        transferExample: "If BrightBean sells coffee on credit, accounting still records revenue and accounts receivable even before cash arrives.",
+        statementNote: "These highlighted lines show that accounting tracks both performance and financial position.",
+        microCheck: {
+          prompt: "Which phrase best fits accounting here?",
+          choices: ["A system for financial information", "A schedule of recipes", "A cash-only list"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q2",
+        module: "language",
+        prompt: "A BrightBean employee records a cash payment for paper cups. Which term best fits that recording work?",
+        choices: [
+          "Bookkeeping",
+          "Financing",
+          "Marketing",
+          "Forecasting"
+        ],
+        correctIndex: 0,
+        concepts: ["bookkeeping"],
+        statementRefs: ["income"],
+        highlightLines: ["cost_of_ingredients"],
+        whyCorrect: "Bookkeeping is the detailed recording of transactions that already happened.",
+        wrongWhy: [
+          "Financing is about raising money, not recording each payment.",
+          "Marketing is about attracting customers, not recording transactions.",
+          "Forecasting looks ahead instead of recording actual events."
+        ],
+        statementImpact: "Bookkeeping provides the raw records that later support the statements.",
+        transferExample: "When BrightBean records rent paid, that bookkeeping step helps produce Rent Expense later.",
+        statementNote: "This highlighted expense line depends on good bookkeeping records behind the scenes.",
+        microCheck: {
+          prompt: "Does bookkeeping look forward or record what already happened?",
+          choices: ["It records what already happened", "It only looks forward"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q3",
+        module: "language",
+        prompt: "BrightBean’s owner wants year-end statements to share with a lender. Which branch of accounting is this?",
+        choices: [
+          "Financial accounting",
+          "Recipe accounting",
+          "Personal budgeting",
+          "Menu engineering"
+        ],
+        correctIndex: 0,
+        concepts: ["financial_accounting"],
+        statementRefs: ["balance", "income"],
+        highlightLines: ["total_assets", "net_income"],
+        whyCorrect: "Financial accounting focuses on reports for outside users such as lenders and investors.",
+        wrongWhy: [
+          "Recipe accounting is not a formal accounting branch.",
+          "Personal budgeting is not BrightBean’s company reporting.",
+          "Menu engineering may help pricing, but it is not the reporting framework."
+        ],
+        statementImpact: "The lender would care about BrightBean’s balance sheet and income statement.",
+        transferExample: "A lender may ask whether BrightBean is profitable and whether it can repay debt.",
+        statementNote: "Total assets and net income are the kinds of summary numbers external users study.",
+        microCheck: {
+          prompt: "Who is the audience here?",
+          choices: ["An external user like a lender", "Only the barista on shift"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q4",
+        module: "language",
+        prompt: "BrightBean earns money from selling coffee to customers. That amount is called:",
+        choices: [
+          "Revenue",
+          "Expense",
+          "Liability",
+          "Owner capital"
+        ],
+        correctIndex: 0,
+        concepts: ["revenue"],
+        statementRefs: ["income"],
+        highlightLines: ["sales_revenue"],
+        whyCorrect: "Revenue is what the business earns from providing goods or services to customers.",
+        wrongWhy: [
+          "Expense is a cost, not what was earned.",
+          "Liability is an obligation owed to someone else.",
+          "Owner capital is owner investment, not sales earned from customers."
+        ],
+        statementImpact: "Revenue appears on the income statement because it helps explain performance over the year.",
+        transferExample: "When BrightBean caters an office event, the amount earned is still revenue.",
+        statementNote: "Sales Revenue is highlighted because that is the direct home for earned sales.",
+        microCheck: {
+          prompt: "What is revenue about?",
+          choices: ["What the business earns", "What the business owes", "What the owner invested"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q5",
+        module: "language",
+        prompt: "BrightBean pays monthly rent for its cart location. Rent is best described as:",
+        choices: [
+          "An expense",
+          "A revenue line",
+          "A liability from customers",
+          "Owner capital"
+        ],
+        correctIndex: 0,
+        concepts: ["expense"],
+        statementRefs: ["income"],
+        highlightLines: ["rent_expense", "net_income"],
+        whyCorrect: "Rent is a cost of operating during the period, so it is an expense.",
+        wrongWhy: [
+          "Revenue shows what was earned, not what was spent.",
+          "Customer liabilities relate to amounts owed for future service, not rent.",
+          "Owner capital is owner investment, not monthly operating cost."
+        ],
+        statementImpact: "Rent Expense reduces net income on the income statement.",
+        transferExample: "Wages and utilities work in a similar way because they are also operating costs.",
+        statementNote: "The highlighted lines show that rent reduces performance for the period.",
+        microCheck: {
+          prompt: "Does an expense help or reduce net income?",
+          choices: ["It reduces net income", "It increases net income"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q6",
+        module: "language",
+        prompt: "If BrightBean’s revenue is greater than its expenses, the result is:",
+        choices: [
+          "Net income",
+          "Unearned revenue",
+          "A liability",
+          "Bookkeeping"
+        ],
+        correctIndex: 0,
+        concepts: ["net_income"],
+        statementRefs: ["income"],
+        highlightLines: ["sales_revenue", "net_income"],
+        whyCorrect: "Net income is the amount left after subtracting expenses from revenue.",
+        wrongWhy: [
+          "Unearned revenue is a liability from customer cash received before service.",
+          "A liability is an obligation, not a profit result.",
+          "Bookkeeping is a process, not the period result."
+        ],
+        statementImpact: "Net Income appears at the bottom of the income statement as the final result for the year.",
+        transferExample: "If revenue falls below expenses instead, BrightBean would report a loss instead of net income.",
+        statementNote: "The top revenue line and bottom net income line show the path from earning to result.",
+        microCheck: {
+          prompt: "Which comparison creates net income?",
+          choices: ["Revenue minus expenses", "Assets minus liabilities"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q7",
+        module: "language",
+        prompt: "The basic accounting equation says assets must equal:",
+        choices: [
+          "Liabilities plus equity",
+          "Revenue plus expenses",
+          "Cash plus profit",
+          "Expenses plus owner capital only"
+        ],
+        correctIndex: 0,
+        concepts: ["accounting_equation"],
+        statementRefs: ["balance"],
+        highlightLines: ["total_assets", "total_liabilities_equity"],
+        whyCorrect: "The accounting equation is Assets = Liabilities + Equity.",
+        wrongWhy: [
+          "Revenue and expenses belong to the income statement, not the balance sheet equation.",
+          "Cash is only one asset and profit is not the whole right side of the equation.",
+          "Equity matters, but liabilities matter too."
+        ],
+        statementImpact: "The balance sheet is structured so both sides stay equal.",
+        transferExample: "If BrightBean borrows cash, assets go up and liabilities go up, keeping the equation balanced.",
+        statementNote: "The two highlighted totals match because the accounting equation is holding together.",
+        microCheck: {
+          prompt: "Which side matches total assets?",
+          choices: ["Liabilities plus equity", "Revenue plus expenses"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q8",
+        module: "language",
+        prompt: "If BrightBean buys supplies today but will pay next week, which idea matters most?",
+        choices: [
+          "Accounting records effects even when cash has not moved yet",
+          "Nothing is recorded until cash moves",
+          "It automatically becomes revenue",
+          "It only changes the owner’s personal budget"
+        ],
+        correctIndex: 0,
+        concepts: ["accounting_basics", "bookkeeping"],
+        statementRefs: ["balance"],
+        highlightLines: ["accounts_payable", "inventory"],
+        whyCorrect: "Accounting records obligations and resources when the transaction happens, not only when cash changes hands.",
+        wrongWhy: [
+          "Waiting for cash would miss the liability and the asset created today.",
+          "Buying supplies is not customer revenue.",
+          "This is company accounting, not personal budgeting."
+        ],
+        statementImpact: "The balance sheet can change even before cash changes.",
+        transferExample: "Credit purchases often raise inventory and accounts payable on the same day.",
+        statementNote: "These highlighted lines show how accounting can move before cash moves.",
+        microCheck: {
+          prompt: "Does accounting wait for cash every time?",
+          choices: ["No", "Yes"],
+          correctIndex: 0
+        }
+      },
+
+      {
+        id: "q9",
+        module: "balance",
+        prompt: "BrightBean’s equipment helps the cart make sales over many months. Equipment is a:",
+        choices: [
+          "Long-term asset",
+          "Current liability",
+          "Revenue line",
+          "Customer prepayment"
+        ],
+        correctIndex: 0,
+        concepts: ["asset", "long_term_asset"],
+        statementRefs: ["balance"],
+        highlightLines: ["equipment"],
+        whyCorrect: "Equipment is a resource BrightBean controls and expects to use beyond the near term.",
+        wrongWhy: [
+          "A current liability is an obligation owed soon, not a resource owned.",
+          "Revenue lines belong on the income statement, not the balance sheet.",
+          "Customer prepayments create unearned revenue, not equipment."
+        ],
+        statementImpact: "Equipment is reported under assets on the balance sheet.",
+        transferExample: "An espresso machine works the same way because it helps future periods too.",
+        statementNote: "Equipment is highlighted because it is a clear long-term asset.",
+        microCheck: {
+          prompt: "Why is equipment not current?",
+          choices: ["It helps beyond the near term", "It is owed soon"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q10",
+        module: "balance",
+        prompt: "BrightBean still owes a supplier for beans it bought on credit. That unpaid amount is a:",
+        choices: [
+          "Liability",
+          "Revenue",
+          "Long-term asset",
+          "Net income"
+        ],
+        correctIndex: 0,
+        concepts: ["liability"],
+        statementRefs: ["balance"],
+        highlightLines: ["accounts_payable"],
+        whyCorrect: "A liability is an obligation to give up value in the future because of a past event.",
+        wrongWhy: [
+          "Revenue is earned from customers, not owed to suppliers.",
+          "An asset is controlled by the business, but this amount is owed out.",
+          "Net income is the period result, not an obligation."
+        ],
+        statementImpact: "Accounts Payable appears on the balance sheet under liabilities.",
+        transferExample: "A utility bill owed at month-end would also be a liability.",
+        statementNote: "Accounts Payable is highlighted because it is the direct example of a supplier obligation.",
+        microCheck: {
+          prompt: "Who is owed here?",
+          choices: ["The supplier", "The customer"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q11",
+        module: "balance",
+        prompt: "What is the owner’s remaining claim after BrightBean subtracts liabilities from assets?",
+        choices: [
+          "Equity",
+          "Revenue",
+          "Expense",
+          "Accounts receivable"
+        ],
+        correctIndex: 0,
+        concepts: ["equity"],
+        statementRefs: ["balance"],
+        highlightLines: ["owner_capital", "retained_earnings", "total_equity"],
+        whyCorrect: "Equity is the owner’s residual claim after liabilities are considered.",
+        wrongWhy: [
+          "Revenue is earned during the period, not the owner’s residual claim.",
+          "Expense is a cost, not an ownership claim.",
+          "Accounts receivable is one specific asset, not the whole residual amount."
+        ],
+        statementImpact: "Equity appears on the balance sheet as owner capital and retained earnings.",
+        transferExample: "If assets rise while liabilities stay the same, equity can increase too.",
+        statementNote: "These equity lines show the owner’s interest in BrightBean.",
+        microCheck: {
+          prompt: "Is equity what is left after liabilities?",
+          choices: ["Yes", "No"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q12",
+        module: "balance",
+        prompt: "The phrase <strong>as of one date</strong> tells you the balance sheet is showing:",
+        choices: [
+          "A snapshot at a moment in time",
+          "A full-year movie of activity",
+          "Only cash transactions",
+          "Only owner investments"
+        ],
+        correctIndex: 0,
+        concepts: ["snapshot_date"],
+        statementRefs: ["balance"],
+        highlightLines: ["cash", "accounts_payable"],
+        whyCorrect: "The balance sheet reports what BrightBean has and owes at one exact date.",
+        wrongWhy: [
+          "A full-year movie belongs to performance statements, not the balance sheet snapshot.",
+          "The balance sheet includes more than cash.",
+          "The balance sheet includes many lines besides owner investment."
+        ],
+        statementImpact: "Every line shown is the amount that exists at December 31, 2026.",
+        transferExample: "Cash can change on January 1, but the December 31 balance sheet still stays a December 31 snapshot.",
+        statementNote: "These lines are date-based amounts, not year-long totals.",
+        microCheck: {
+          prompt: "Does a balance sheet show one date or a full year?",
+          choices: ["One date", "A full year"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q13",
+        module: "balance",
+        prompt: "Which BrightBean line is a <strong>current asset</strong> because it should turn into cash, be sold, or be used soon?",
+        choices: [
+          "Inventory",
+          "Long Term Loan",
+          "Owner Capital",
+          "Retained Earnings"
+        ],
+        correctIndex: 0,
+        concepts: ["current_asset"],
+        statementRefs: ["balance"],
+        highlightLines: ["inventory"],
+        whyCorrect: "Inventory is expected to be sold or used in the near-term operating cycle.",
+        wrongWhy: [
+          "Long Term Loan is a liability, not an asset.",
+          "Owner Capital is equity, not an asset.",
+          "Retained Earnings is also equity, not an asset."
+        ],
+        statementImpact: "Inventory appears with other assets because it provides future benefit soon.",
+        transferExample: "Paper cups waiting to be used for sales also fit the idea of a current asset.",
+        statementNote: "Inventory is highlighted because it is one of BrightBean’s near-term resources.",
+        microCheck: {
+          prompt: "Why is inventory current?",
+          choices: ["It should be used or sold soon", "It lasts for many years"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q14",
+        module: "balance",
+        prompt: "Which BrightBean line is a <strong>long-term asset</strong> rather than a current one?",
+        choices: [
+          "Equipment",
+          "Cash",
+          "Accounts Receivable",
+          "Inventory"
+        ],
+        correctIndex: 0,
+        concepts: ["long_term_asset"],
+        statementRefs: ["balance"],
+        highlightLines: ["equipment"],
+        whyCorrect: "Equipment helps beyond the near term, so it is a long-term asset.",
+        wrongWhy: [
+          "Cash is current because it is already cash.",
+          "Accounts Receivable is usually expected to be collected soon.",
+          "Inventory is usually expected to be used or sold soon."
+        ],
+        statementImpact: "Equipment remains on the balance sheet because it supports future periods.",
+        transferExample: "A coffee grinder or espresso machine would fit the same category.",
+        statementNote: "Equipment is highlighted because it stays useful across many periods.",
+        microCheck: {
+          prompt: "Which clue matters for long-term assets?",
+          choices: ["Benefit lasts beyond the near term", "The item is a short bill"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q15",
+        module: "balance",
+        prompt: "BrightBean received cash for a future event it has <strong>not yet delivered</strong>. Which balance sheet line fits best?",
+        choices: [
+          "Unearned Revenue",
+          "Sales Revenue",
+          "Owner Capital",
+          "Inventory"
+        ],
+        correctIndex: 0,
+        concepts: ["current_liability", "unearned_revenue"],
+        statementRefs: ["balance"],
+        highlightLines: ["unearned_revenue"],
+        whyCorrect: "Unearned revenue is a liability because BrightBean still owes the customer service.",
+        wrongWhy: [
+          "Sales Revenue is used when the service is already earned.",
+          "Owner Capital is owner investment, not a customer obligation.",
+          "Inventory is a resource, not an obligation."
+        ],
+        statementImpact: "Unearned Revenue appears under liabilities because the work is still owed.",
+        transferExample: "A prepaid office catering deposit would work the same way.",
+        statementNote: "Unearned Revenue is highlighted because it captures cash received before delivery.",
+        microCheck: {
+          prompt: "Why is unearned revenue a liability?",
+          choices: ["BrightBean still owes service", "BrightBean already earned everything"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q16",
+        module: "balance",
+        prompt: "Which BrightBean balance sheet line is a <strong>long-term liability</strong>?",
+        choices: [
+          "Long Term Loan",
+          "Accounts Payable",
+          "Cash",
+          "Sales Revenue"
+        ],
+        correctIndex: 0,
+        concepts: ["long_term_liability"],
+        statementRefs: ["balance"],
+        highlightLines: ["long_term_loan"],
+        whyCorrect: "A long-term loan is an obligation due beyond the near term.",
+        wrongWhy: [
+          "Accounts Payable is usually a short-term operating liability.",
+          "Cash is an asset, not a liability.",
+          "Sales Revenue belongs on the income statement."
+        ],
+        statementImpact: "Long Term Loan appears under liabilities on the balance sheet.",
+        transferExample: "A multi-year bank note to buy equipment would also be long-term.",
+        statementNote: "The highlighted loan line is the main long-term obligation on BrightBean’s balance sheet.",
+        microCheck: {
+          prompt: "What makes a liability long-term?",
+          choices: ["It is due beyond the near term", "It is collected from customers soon"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q17",
+        module: "balance",
+        prompt: "BrightBean delivered coffee to a customer today and will collect next week. Which balance sheet line rises now?",
+        choices: [
+          "Accounts Receivable",
+          "Accounts Payable",
+          "Unearned Revenue",
+          "Long Term Loan"
+        ],
+        correctIndex: 0,
+        concepts: ["accounts_receivable", "current_asset"],
+        statementRefs: ["balance", "income"],
+        highlightLines: ["accounts_receivable", "sales_revenue"],
+        whyCorrect: "Accounts Receivable rises because the customer now owes BrightBean for a delivered sale.",
+        wrongWhy: [
+          "Accounts Payable is what BrightBean owes suppliers.",
+          "Unearned Revenue is used when cash arrives before service.",
+          "Long Term Loan has nothing to do with a normal customer sale."
+        ],
+        statementImpact: "Accounts Receivable rises on the balance sheet and revenue rises on the income statement.",
+        transferExample: "A weekly office coffee invoice would produce the same pattern.",
+        statementNote: "These lines show that a credit sale affects both the balance sheet and income statement.",
+        microCheck: {
+          prompt: "Who owes money in accounts receivable?",
+          choices: ["The customer", "The supplier"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q18",
+        module: "balance",
+        prompt: "If BrightBean’s total assets are $40,000 and total liabilities are $20,000, what is total equity?",
+        choices: [
+          "$20,000",
+          "$60,000",
+          "$8,000",
+          "$12,000"
+        ],
+        correctIndex: 0,
+        concepts: ["equity", "accounting_equation"],
+        statementRefs: ["balance"],
+        highlightLines: ["total_assets", "total_liabilities", "total_equity"],
+        whyCorrect: "Equity is the remaining amount after liabilities are subtracted from assets, so $40,000 minus $20,000 equals $20,000.",
+        wrongWhy: [
+          "$60,000 adds the two sides instead of solving the equation.",
+          "$8,000 is only retained earnings, not total equity.",
+          "$12,000 is only owner capital, not total equity."
+        ],
+        statementImpact: "The balance sheet totals show how the equation stays balanced.",
+        transferExample: "If liabilities increased without assets changing, equity would have to be smaller.",
+        statementNote: "These highlighted totals show the equation at work.",
+        microCheck: {
+          prompt: "What equation fits this idea?",
+          choices: ["Assets minus liabilities equals equity", "Revenue minus expenses equals equity"],
+          correctIndex: 0
+        }
+      },
+
+      {
+        id: "q19",
+        module: "income",
+        prompt: "The income statement says <strong>for the year ended December 31, 2026</strong>. What does that mean?",
+        choices: [
+          "It reports performance over a period",
+          "It reports a one-day snapshot only",
+          "It shows only unpaid bills",
+          "It shows only owner investments"
+        ],
+        correctIndex: 0,
+        concepts: ["income_period"],
+        statementRefs: ["income"],
+        highlightLines: ["sales_revenue", "net_income"],
+        whyCorrect: "The income statement covers activity across a span of time, such as a month or year.",
+        wrongWhy: [
+          "A one-day snapshot describes the balance sheet, not the income statement.",
+          "The income statement includes earned and incurred amounts whether paid or unpaid.",
+          "Owner investments belong on the balance sheet, not as the main focus here."
+        ],
+        statementImpact: "Revenue, expenses, and net income are all period-based measures.",
+        transferExample: "A monthly income statement would work the same way but for a shorter period.",
+        statementNote: "The highlighted lines belong to a period story, not a single date snapshot.",
+        microCheck: {
+          prompt: "Is the income statement a date snapshot?",
+          choices: ["No", "Yes"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q20",
+        module: "income",
+        prompt: "Which BrightBean line belongs near the top of the income statement because it shows what was earned from customers?",
+        choices: [
+          "Sales Revenue",
+          "Wages Expense",
+          "Accounts Payable",
+          "Equipment"
+        ],
+        correctIndex: 0,
+        concepts: ["revenue", "statement_classification"],
+        statementRefs: ["income"],
+        highlightLines: ["sales_revenue"],
+        whyCorrect: "Sales Revenue shows what BrightBean earned from customers during the period.",
+        wrongWhy: [
+          "Wages Expense is a cost, not earned inflow.",
+          "Accounts Payable is a balance sheet liability.",
+          "Equipment is a balance sheet asset."
+        ],
+        statementImpact: "Revenue starts the path toward net income on the income statement.",
+        transferExample: "Office catering sales would also be part of Sales Revenue once earned.",
+        statementNote: "Sales Revenue is highlighted because it is the main earned inflow line.",
+        microCheck: {
+          prompt: "Does revenue belong before expenses on the income statement?",
+          choices: ["Yes", "No"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q21",
+        module: "income",
+        prompt: "Which BrightBean line is an expense because it reflects labor cost for the year?",
+        choices: [
+          "Wages Expense",
+          "Accounts Receivable",
+          "Owner Capital",
+          "Unearned Revenue"
+        ],
+        correctIndex: 0,
+        concepts: ["expense", "statement_classification"],
+        statementRefs: ["income"],
+        highlightLines: ["wages_expense", "net_income"],
+        whyCorrect: "Wages Expense is a cost incurred to help BrightBean operate during the year.",
+        wrongWhy: [
+          "Accounts Receivable is an asset.",
+          "Owner Capital is equity.",
+          "Unearned Revenue is a liability."
+        ],
+        statementImpact: "Wages Expense reduces net income on the income statement.",
+        transferExample: "Rent and utilities also work as expenses because they are operating costs.",
+        statementNote: "The highlighted lines show the path from expense to lower net income.",
+        microCheck: {
+          prompt: "Is wages a cost or an asset here?",
+          choices: ["A cost", "An asset"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q22",
+        module: "income",
+        prompt: "If BrightBean has $52,000 of revenue and $44,000 of total expenses, what is net income?",
+        choices: [
+          "$8,000",
+          "$96,000",
+          "$44,000",
+          "$20,000"
+        ],
+        correctIndex: 0,
+        concepts: ["net_income"],
+        statementRefs: ["income"],
+        highlightLines: ["sales_revenue", "net_income"],
+        whyCorrect: "Net income equals revenue minus expenses, so $52,000 minus $44,000 equals $8,000.",
+        wrongWhy: [
+          "$96,000 adds instead of subtracting.",
+          "$44,000 is the expense total, not profit.",
+          "$20,000 is total equity, not current-year net income."
+        ],
+        statementImpact: "Net Income is the final bottom-line result on the income statement.",
+        transferExample: "If expenses rose without revenue changing, net income would fall.",
+        statementNote: "These lines show how the statement moves from top-line revenue to bottom-line net income.",
+        microCheck: {
+          prompt: "What math creates net income?",
+          choices: ["Revenue minus expenses", "Assets minus liabilities"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q23",
+        module: "income",
+        prompt: "Where does BrightBean report the cost of ingredients and cups used to make sales?",
+        choices: [
+          "On the income statement as an expense line",
+          "On the balance sheet as owner capital",
+          "On the balance sheet as a long-term loan",
+          "On the income statement as revenue"
+        ],
+        correctIndex: 0,
+        concepts: ["expense", "statement_classification"],
+        statementRefs: ["income"],
+        highlightLines: ["cost_of_ingredients"],
+        whyCorrect: "Cost of Ingredients and Cups is an expense because it is part of earning sales.",
+        wrongWhy: [
+          "Owner capital is owner investment, not operating cost.",
+          "Long-term loan is a liability, not ingredient cost.",
+          "Revenue is what was earned, not what was used up."
+        ],
+        statementImpact: "This expense reduces net income for the year.",
+        transferExample: "Milk, cups, and lids used in sales also fit this kind of expense behavior.",
+        statementNote: "The highlighted line shows one of BrightBean’s direct operating costs.",
+        microCheck: {
+          prompt: "Is this line revenue or expense?",
+          choices: ["Expense", "Revenue"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q24",
+        module: "income",
+        prompt: "If BrightBean pays interest on its bank loan, where does that cost appear?",
+        choices: [
+          "Interest Expense on the income statement",
+          "Inventory on the balance sheet",
+          "Owner Capital on the balance sheet",
+          "Accounts Receivable on the balance sheet"
+        ],
+        correctIndex: 0,
+        concepts: ["expense", "statement_classification"],
+        statementRefs: ["income"],
+        highlightLines: ["interest_expense", "net_income"],
+        whyCorrect: "Interest Expense is the period cost of borrowing money.",
+        wrongWhy: [
+          "Inventory is an asset, not borrowing cost.",
+          "Owner Capital is owner investment, not financing cost.",
+          "Accounts Receivable is what customers owe BrightBean."
+        ],
+        statementImpact: "Interest Expense lowers net income for the period.",
+        transferExample: "Interest on a different loan would still belong as an expense in the same way.",
+        statementNote: "The highlighted lines show that financing cost still affects the income statement.",
+        microCheck: {
+          prompt: "Does interest reduce or increase net income?",
+          choices: ["Reduce", "Increase"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q25",
+        module: "income",
+        prompt: "Which BrightBean line is another example of an operating expense rather than revenue?",
+        choices: [
+          "Utilities Expense",
+          "Sales Revenue",
+          "Accounts Receivable",
+          "Owner Capital"
+        ],
+        correctIndex: 0,
+        concepts: ["expense"],
+        statementRefs: ["income"],
+        highlightLines: ["utilities_expense"],
+        whyCorrect: "Utilities Expense is a cost of running the business during the year.",
+        wrongWhy: [
+          "Sales Revenue is earned inflow, not cost.",
+          "Accounts Receivable is a balance sheet asset.",
+          "Owner Capital is a balance sheet equity line."
+        ],
+        statementImpact: "Utilities Expense belongs on the income statement with other costs.",
+        transferExample: "Water or internet cost for the cart would fit the same idea.",
+        statementNote: "Utilities Expense is highlighted because it is a clear operating cost.",
+        microCheck: {
+          prompt: "Which statement houses utilities expense?",
+          choices: ["Income statement", "Balance sheet"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q26",
+        module: "income",
+        prompt: "If BrightBean earns more revenue while expenses stay the same, what usually happens to net income?",
+        choices: [
+          "Net income goes up",
+          "Net income goes down",
+          "Net income becomes a liability",
+          "Nothing changes"
+        ],
+        correctIndex: 0,
+        concepts: ["net_income", "revenue"],
+        statementRefs: ["income"],
+        highlightLines: ["sales_revenue", "net_income"],
+        whyCorrect: "When revenue rises and expenses do not, more is left over as net income.",
+        wrongWhy: [
+          "Net income does not usually go down when only revenue rises.",
+          "Net income is not a liability.",
+          "A change in revenue usually changes the bottom line."
+        ],
+        statementImpact: "Higher revenue can push the bottom-line net income higher.",
+        transferExample: "An extra profitable catering order can lift the year’s net income.",
+        statementNote: "The highlighted lines show the top-to-bottom connection inside the income statement.",
+        microCheck: {
+          prompt: "If revenue rises alone, what happens to net income?",
+          choices: ["It rises", "It falls"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q27",
+        module: "income",
+        prompt: "Which statement best describes the job of the income statement?",
+        choices: [
+          "It explains performance over a period",
+          "It lists only what the company owns on one date",
+          "It shows only loans and cash",
+          "It only tracks customer deposits"
+        ],
+        correctIndex: 0,
+        concepts: ["income_period", "statement_classification"],
+        statementRefs: ["income"],
+        highlightLines: ["sales_revenue", "wages_expense", "net_income"],
+        whyCorrect: "The income statement explains how revenue and expenses produced net income or loss over a period.",
+        wrongWhy: [
+          "Listing what the company owns on one date is the balance sheet’s job.",
+          "Loans and cash are only part of the financial picture.",
+          "Customer deposits are only one special topic, not the whole statement."
+        ],
+        statementImpact: "The statement gathers revenue and expenses into one period-based performance story.",
+        transferExample: "A monthly income statement works exactly the same way but covers a shorter period.",
+        statementNote: "These highlighted lines show the flow from earning and spending to final performance.",
+        microCheck: {
+          prompt: "Does the income statement focus on one date or a period?",
+          choices: ["A period", "One date"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q28",
+        module: "income",
+        prompt: "If BrightBean’s expenses become larger than its revenue, what is the best description?",
+        choices: [
+          "The business has a loss instead of net income",
+          "The business automatically has more equity",
+          "The balance sheet disappears",
+          "Revenue becomes a liability"
+        ],
+        correctIndex: 0,
+        concepts: ["net_income", "expense"],
+        statementRefs: ["income"],
+        highlightLines: ["net_income"],
+        whyCorrect: "When expenses exceed revenue, the period result is a loss rather than net income.",
+        wrongWhy: [
+          "Higher expenses do not automatically create more equity.",
+          "The balance sheet still exists even when performance is weak.",
+          "Revenue does not turn into a liability because expenses are higher."
+        ],
+        statementImpact: "The income statement would show a negative result instead of positive net income.",
+        transferExample: "A slow winter month with low sales and fixed rent could create a loss.",
+        statementNote: "Net Income is highlighted because that bottom line would turn negative in a loss period.",
+        microCheck: {
+          prompt: "What is the result if expenses are bigger than revenue?",
+          choices: ["A loss", "More net income"],
+          correctIndex: 0
+        }
+      },
+
+      {
+        id: "q29",
+        module: "bridge",
+        prompt: "BrightBean earned $8,000 of net income for the year and kept it in the business. Where does that amount flow next?",
+        choices: [
+          "Into Retained Earnings on the balance sheet",
+          "Into Accounts Payable",
+          "Into Equipment",
+          "Into Unearned Revenue"
+        ],
+        correctIndex: 0,
+        concepts: ["retained_earnings", "net_income_flow"],
+        statementRefs: ["income", "balance"],
+        highlightLines: ["net_income", "retained_earnings"],
+        whyCorrect: "Net income that is kept in the business increases retained earnings in equity.",
+        wrongWhy: [
+          "Accounts Payable tracks supplier obligations, not accumulated profit.",
+          "Equipment is an asset, not the destination for net income.",
+          "Unearned Revenue is a customer liability, not accumulated profit."
+        ],
+        statementImpact: "Net income is reported on the income statement and then increases retained earnings on the balance sheet.",
+        transferExample: "A profitable quarter can raise retained earnings if the profit stays in the company.",
+        statementNote: "These highlighted lines show the bridge from income statement result to equity.",
+        microCheck: {
+          prompt: "What balance sheet line receives retained profit?",
+          choices: ["Retained Earnings", "Accounts Payable"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q30",
+        module: "bridge",
+        prompt: "Which pair best shows the connection between the two main statements?",
+        choices: [
+          "Net Income on the income statement connects to Retained Earnings on the balance sheet",
+          "Inventory connects to Wages Expense only",
+          "Cash connects only to taxes",
+          "Owner Capital connects to revenue every day"
+        ],
+        correctIndex: 0,
+        concepts: ["statement_relationship"],
+        statementRefs: ["income", "balance"],
+        highlightLines: ["net_income", "retained_earnings"],
+        whyCorrect: "A key statement bridge is the movement from period profit to retained earnings in equity.",
+        wrongWhy: [
+          "Inventory can influence expenses later, but that is not the main statement bridge here.",
+          "Cash connects to many things, not just taxes.",
+          "Owner capital comes from owner investment, not daily revenue."
+        ],
+        statementImpact: "This bridge helps explain why a profitable period changes a balance sheet equity line.",
+        transferExample: "A loss would lower retained earnings instead of raising it.",
+        statementNote: "These two highlighted lines show the cleanest statement-to-statement path in the app.",
+        microCheck: {
+          prompt: "What is the destination of net income when it stays in the business?",
+          choices: ["Retained Earnings", "Inventory"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q31",
+        module: "bridge",
+        prompt: "Suppose BrightBean has a loss instead of net income. What would happen to retained earnings, all else equal?",
+        choices: [
+          "Retained Earnings would decrease",
+          "Retained Earnings would become revenue",
+          "Retained Earnings would become a liability",
+          "Nothing would change"
+        ],
+        correctIndex: 0,
+        concepts: ["retained_earnings", "net_income_flow"],
+        statementRefs: ["balance"],
+        highlightLines: ["retained_earnings"],
+        whyCorrect: "A loss lowers the accumulated earnings kept in the business.",
+        wrongWhy: [
+          "Retained Earnings does not turn into revenue.",
+          "Retained Earnings is part of equity, not automatically a liability.",
+          "A loss changes retained earnings if it remains in the company."
+        ],
+        statementImpact: "Retained earnings can move up or down depending on the period result.",
+        transferExample: "If BrightBean has a weak month, retained earnings can fall even though the account still stays in equity.",
+        statementNote: "Retained Earnings is highlighted because it is the equity line that absorbs the period result.",
+        microCheck: {
+          prompt: "Does a loss push retained earnings up or down?",
+          choices: ["Down", "Up"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q32",
+        module: "bridge",
+        prompt: "BrightBean starts the year with retained earnings of $6,000 and earns $8,000 with no withdrawals. Ending retained earnings is:",
+        choices: [
+          "$14,000",
+          "$2,000",
+          "$8,000",
+          "$48,000"
+        ],
+        correctIndex: 0,
+        concepts: ["retained_earnings", "net_income_flow"],
+        statementRefs: ["balance", "income"],
+        highlightLines: ["retained_earnings", "net_income"],
+        whyCorrect: "Beginning retained earnings plus net income gives ending retained earnings when there are no withdrawals: $6,000 + $8,000 = $14,000.",
+        wrongWhy: [
+          "$2,000 subtracts instead of adding the year’s income.",
+          "$8,000 is only the current-year net income, not ending retained earnings.",
+          "$48,000 is unrelated to this rollforward."
+        ],
+        statementImpact: "This is a direct example of the bridge from the income statement to equity on the balance sheet.",
+        transferExample: "If there had been a loss instead, the ending retained earnings would be smaller.",
+        statementNote: "These lines show the current-year result being added into retained earnings.",
+        microCheck: {
+          prompt: "What formula works here?",
+          choices: ["Beginning retained earnings plus net income", "Assets plus liabilities"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q33",
+        module: "bridge",
+        prompt: "Which statement best links the balance sheet and income statement idea of time?",
+        choices: [
+          "The income statement covers a period, and one result of that period can change the balance sheet on a date",
+          "Both statements always show the same kind of time view",
+          "The balance sheet covers a year while the income statement shows one day",
+          "Time does not matter in financial statements"
+        ],
+        correctIndex: 0,
+        concepts: ["statement_relationship", "snapshot_date", "income_period"],
+        statementRefs: ["income", "balance"],
+        highlightLines: ["net_income", "retained_earnings"],
+        whyCorrect: "The income statement tells a period story. One important output of that period story can then appear inside the date-based balance sheet.",
+        wrongWhy: [
+          "The two statements use different time ideas.",
+          "That reverses the time roles of the statements.",
+          "Time is a major clue in accounting reporting."
+        ],
+        statementImpact: "Net income comes from a period and can affect retained earnings on the date-based balance sheet.",
+        transferExample: "A month-end profit can increase retained earnings on the month-end balance sheet.",
+        statementNote: "These highlighted lines show how a period result ends up inside a date snapshot.",
+        microCheck: {
+          prompt: "Which statement is the date snapshot?",
+          choices: ["Balance sheet", "Income statement"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q34",
+        module: "bridge",
+        prompt: "BrightBean makes a credit sale. Which statements move right away?",
+        choices: [
+          "The balance sheet and income statement",
+          "Only the balance sheet",
+          "Only the income statement",
+          "Only the cash flow statement"
+        ],
+        correctIndex: 0,
+        concepts: ["statement_relationship", "accounts_receivable"],
+        statementRefs: ["balance", "income"],
+        highlightLines: ["accounts_receivable", "sales_revenue"],
+        whyCorrect: "A credit sale raises accounts receivable on the balance sheet and revenue on the income statement.",
+        wrongWhy: [
+          "The income statement also moves because revenue was earned.",
+          "The balance sheet also moves because receivables were created.",
+          "Cash flow focuses on cash movement, and cash has not moved yet."
+        ],
+        statementImpact: "One transaction can move more than one statement at once.",
+        transferExample: "A delivered office coffee order billed later would follow this same pattern.",
+        statementNote: "The highlighted lines show the cross-statement effect of a credit sale.",
+        microCheck: {
+          prompt: "Did cash move at the moment of the credit sale?",
+          choices: ["No", "Yes"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q35",
+        module: "bridge",
+        prompt: "Later, BrightBean collects the cash from that earlier credit sale. Which statement line drops?",
+        choices: [
+          "Accounts Receivable",
+          "Sales Revenue",
+          "Rent Expense",
+          "Owner Capital"
+        ],
+        correctIndex: 0,
+        concepts: ["statement_relationship", "accounts_receivable"],
+        statementRefs: ["balance"],
+        highlightLines: ["cash", "accounts_receivable"],
+        whyCorrect: "When cash is collected later, accounts receivable decreases because the customer no longer owes BrightBean.",
+        wrongWhy: [
+          "Sales Revenue was already recorded earlier when the sale was earned.",
+          "Rent Expense is unrelated to collecting a customer balance.",
+          "Owner Capital does not change because of a normal collection."
+        ],
+        statementImpact: "Cash rises and accounts receivable falls, but revenue does not rise again.",
+        transferExample: "A customer paying an invoice two weeks later follows the same pattern.",
+        statementNote: "These highlighted balance sheet lines show collection without new revenue.",
+        microCheck: {
+          prompt: "Does revenue rise again when the cash is collected later?",
+          choices: ["No", "Yes"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q36",
+        module: "bridge",
+        prompt: "Which statement best captures the accounting equation inside the balance sheet?",
+        choices: [
+          "Assets are supported by liabilities and equity",
+          "Revenue always equals cash",
+          "Expenses always equal payables",
+          "Net income is always the same as owner capital"
+        ],
+        correctIndex: 0,
+        concepts: ["accounting_equation", "statement_relationship"],
+        statementRefs: ["balance"],
+        highlightLines: ["total_assets", "total_liabilities_equity"],
+        whyCorrect: "The balance sheet works because the company’s assets are financed by liabilities and equity.",
+        wrongWhy: [
+          "Revenue can exist without immediate cash, such as a credit sale.",
+          "Expenses do not always equal accounts payable.",
+          "Owner capital and net income are different ideas."
+        ],
+        statementImpact: "The balance sheet totals stay in balance because of this relationship.",
+        transferExample: "Borrowing cash increases both assets and liabilities, keeping the equation balanced.",
+        statementNote: "These two totals show the equation expressed on the balance sheet.",
+        microCheck: {
+          prompt: "What supports assets on the other side of the balance sheet?",
+          choices: ["Liabilities and equity", "Revenue and expenses"],
+          correctIndex: 0
+        }
+      },
+
+      {
+        id: "q37",
+        module: "revenue_recognition",
+        prompt: "BrightBean receives cash for a New Year’s Day catering event it has <strong>not yet delivered</strong>. What should BrightBean record when cash arrives?",
+        choices: [
+          "Unearned Revenue",
+          "Sales Revenue",
+          "Retained Earnings",
+          "Owner Capital"
+        ],
+        correctIndex: 0,
+        concepts: ["revenue_recognition", "unearned_revenue"],
+        statementRefs: ["balance"],
+        highlightLines: ["cash", "unearned_revenue"],
+        whyCorrect: "If BrightBean has not delivered the service yet, the cash is a liability called unearned revenue.",
+        wrongWhy: [
+          "Sales Revenue is used only when the service is earned.",
+          "Retained Earnings is accumulated profit, not a starting point for customer deposits.",
+          "Owner Capital is owner investment, not customer prepayment."
+        ],
+        statementImpact: "Cash rises, and unearned revenue rises on the balance sheet.",
+        transferExample: "A prepaid office coffee package would work the same way until service is delivered.",
+        statementNote: "The highlighted lines show cash received now and the obligation still owed.",
+        microCheck: {
+          prompt: "What clue blocks immediate revenue?",
+          choices: ["The service is not yet delivered", "Cash arrived"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q38",
+        module: "revenue_recognition",
+        prompt: "BrightBean finally delivers the event it was paid for in advance. What happens now?",
+        choices: [
+          "Unearned Revenue goes down and Sales Revenue goes up",
+          "Cash goes up and Sales Revenue goes up",
+          "Accounts Receivable goes up and Cash goes down",
+          "Owner Capital goes up"
+        ],
+        correctIndex: 0,
+        concepts: ["revenue_recognition", "control_transfer", "unearned_revenue"],
+        statementRefs: ["balance", "income"],
+        highlightLines: ["unearned_revenue", "sales_revenue"],
+        whyCorrect: "Now the service is earned, so the liability decreases and revenue is recognized.",
+        wrongWhy: [
+          "Cash already arrived earlier, so it does not rise again here.",
+          "Accounts Receivable is not the issue because BrightBean was already paid.",
+          "Owner Capital does not change because of normal customer service revenue."
+        ],
+        statementImpact: "The balance sheet liability falls, and the income statement revenue line rises.",
+        transferExample: "A three-month prepaid contract can move into revenue one delivered month at a time.",
+        statementNote: "These highlighted lines show the shift from obligation to earned revenue.",
+        microCheck: {
+          prompt: "What event triggers revenue here?",
+          choices: ["Delivery of the service", "Arrival of cash"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q39",
+        module: "revenue_recognition",
+        prompt: "BrightBean delivers coffee boxes today and sends the customer an invoice. What is the best revenue answer?",
+        choices: [
+          "Recognize revenue now and record accounts receivable",
+          "Wait for cash before recognizing revenue",
+          "Record unearned revenue",
+          "Do nothing until month-end"
+        ],
+        correctIndex: 0,
+        concepts: ["revenue_recognition", "accounts_receivable", "control_transfer"],
+        statementRefs: ["balance", "income"],
+        highlightLines: ["accounts_receivable", "sales_revenue"],
+        whyCorrect: "Revenue is earned when BrightBean has delivered the goods or services, even if cash comes later.",
+        wrongWhy: [
+          "Waiting for cash confuses collection with earning.",
+          "Unearned revenue is for cash received before delivery, not after delivery.",
+          "The sale is already earned, so it should not wait for month-end."
+        ],
+        statementImpact: "Accounts Receivable rises on the balance sheet and Sales Revenue rises on the income statement.",
+        transferExample: "A weekly office subscription billed after delivery follows the same idea.",
+        statementNote: "These highlighted lines show that delivery can create revenue without immediate cash.",
+        microCheck: {
+          prompt: "What replaced cash at the moment of sale?",
+          choices: ["Accounts Receivable", "Unearned Revenue"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q40",
+        module: "revenue_recognition",
+        prompt: "Which clue matters most for deciding whether revenue is recognized?",
+        choices: [
+          "Whether control has transferred to the customer",
+          "Whether the owner wants more profit",
+          "Whether the month is ending",
+          "Whether a supplier bill arrived"
+        ],
+        correctIndex: 0,
+        concepts: ["control_transfer", "revenue_recognition"],
+        statementRefs: ["income"],
+        highlightLines: ["sales_revenue"],
+        whyCorrect: "Revenue recognition focuses on when the customer gets control of the promised goods or service.",
+        wrongWhy: [
+          "Owner preference does not create earned revenue.",
+          "Month-end is not the main rule for earning.",
+          "Supplier bills relate to expenses and liabilities, not customer revenue timing."
+        ],
+        statementImpact: "Control transfer tells you when the revenue line should move.",
+        transferExample: "A catering event becomes revenue when BrightBean actually provides the event.",
+        statementNote: "Sales Revenue is highlighted because that line should move only when control has transferred.",
+        microCheck: {
+          prompt: "What is the anchor rule?",
+          choices: ["Recognize revenue when control transfers", "Recognize revenue whenever cash appears"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q41",
+        module: "revenue_recognition",
+        prompt: "BrightBean receives cash today for a monthly office coffee plan that starts next month. Which statement is best?",
+        choices: [
+          "Record a liability now and earn revenue later",
+          "Record all the revenue now because cash arrived",
+          "Ignore the cash until next month",
+          "Record owner capital now"
+        ],
+        correctIndex: 0,
+        concepts: ["revenue_recognition", "unearned_revenue"],
+        statementRefs: ["balance"],
+        highlightLines: ["cash", "unearned_revenue"],
+        whyCorrect: "Cash can arrive before earning. In that case BrightBean records a liability first and earns revenue later.",
+        wrongWhy: [
+          "Cash does not automatically mean revenue is already earned.",
+          "The cash receipt still matters and should be recorded.",
+          "Customer prepayment is not owner investment."
+        ],
+        statementImpact: "The balance sheet changes first because cash and unearned revenue both rise.",
+        transferExample: "Advance payment for future classes or subscriptions follows the same idea.",
+        statementNote: "These highlighted balance sheet lines show why timing matters in revenue recognition.",
+        microCheck: {
+          prompt: "At cash receipt, is the service already earned?",
+          choices: ["No", "Yes"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q42",
+        module: "revenue_recognition",
+        prompt: "BrightBean prepays for nothing here. Instead, a customer owes BrightBean after delivery. Which concept fits that customer amount?",
+        choices: [
+          "Accounts Receivable",
+          "Unearned Revenue",
+          "Accounts Payable",
+          "Owner Capital"
+        ],
+        correctIndex: 0,
+        concepts: ["accounts_receivable", "revenue_recognition"],
+        statementRefs: ["balance"],
+        highlightLines: ["accounts_receivable"],
+        whyCorrect: "Accounts Receivable is the asset created when customers owe BrightBean after an earned sale.",
+        wrongWhy: [
+          "Unearned Revenue is for cash received before earning.",
+          "Accounts Payable is what BrightBean owes suppliers.",
+          "Owner Capital is owner investment."
+        ],
+        statementImpact: "This asset often appears alongside revenue when a sale is earned on credit.",
+        transferExample: "A delivered invoice for office coffee can increase accounts receivable immediately.",
+        statementNote: "Accounts Receivable is highlighted because it is the customer claim created after delivery.",
+        microCheck: {
+          prompt: "Who owes the money in accounts receivable?",
+          choices: ["The customer", "BrightBean"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q43",
+        module: "revenue_recognition",
+        prompt: "BrightBean has a three-month prepaid customer contract. After one month of service is delivered, what is the best treatment?",
+        choices: [
+          "Recognize one month of revenue and keep the rest as unearned revenue",
+          "Recognize all three months of revenue right away",
+          "Keep all three months as unearned revenue until the very end",
+          "Move the full amount to owner capital"
+        ],
+        correctIndex: 0,
+        concepts: ["revenue_recognition", "control_transfer", "unearned_revenue"],
+        statementRefs: ["balance", "income"],
+        highlightLines: ["unearned_revenue", "sales_revenue"],
+        whyCorrect: "Revenue should be recognized as the service is delivered, not all at once and not too late.",
+        wrongWhy: [
+          "Recognizing everything at once ignores undelivered months.",
+          "Waiting until the very end ignores revenue already earned.",
+          "Customer prepayments never become owner capital."
+        ],
+        statementImpact: "Part of the liability is released and the earned part becomes revenue.",
+        transferExample: "Magazine subscriptions and prepaid meal plans follow the same timing idea.",
+        statementNote: "These highlighted lines show the liability shrinking while earned revenue grows.",
+        microCheck: {
+          prompt: "What decides how much revenue is recognized?",
+          choices: ["How much service has been delivered", "How much cash arrived on day one"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q44",
+        module: "revenue_recognition",
+        prompt: "Which phrase is the biggest warning sign that revenue should probably <strong>not</strong> be recognized yet?",
+        choices: [
+          "<strong>not yet delivered</strong>",
+          "<strong>already served</strong>",
+          "<strong>customer received the order</strong>",
+          "<strong>control transferred</strong>"
+        ],
+        correctIndex: 0,
+        concepts: ["control_transfer", "revenue_recognition"],
+        statementRefs: ["balance"],
+        highlightLines: ["unearned_revenue"],
+        whyCorrect: "If the service is not yet delivered, BrightBean usually still owes the customer something.",
+        wrongWhy: [
+          "Already served points toward earned revenue, not delayed revenue.",
+          "Customer receipt usually means the customer now has control.",
+          "Control transferred is the main clue for recognizing revenue."
+        ],
+        statementImpact: "This warning sign often means the amount belongs in unearned revenue first.",
+        transferExample: "A holiday catering booking paid in advance would fit this clue.",
+        statementNote: "Unearned Revenue is highlighted because this clue often points there first.",
+        microCheck: {
+          prompt: "What does 'not yet delivered' often suggest?",
+          choices: ["Revenue is not earned yet", "Revenue is already earned"],
+          correctIndex: 0
+        }
+      },
+
+      {
+        id: "q45",
+        module: "cash_flow",
+        prompt: "BrightBean buys new equipment with cash. Which statement focuses most directly on that cash movement?",
+        choices: [
+          "Cash Flow Statement",
+          "Balance Sheet only",
+          "Income Statement only",
+          "Statement of Owner Capital only"
+        ],
+        correctIndex: 0,
+        concepts: ["cash_flow_basics", "investing_cash_flow"],
+        statementRefs: ["balance"],
+        highlightLines: ["cash", "equipment"],
+        whyCorrect: "The cash flow statement explains where cash came from and where it went during a period.",
+        wrongWhy: [
+          "The balance sheet shows ending cash and equipment balances but not the full movement story by itself.",
+          "The income statement may not show the whole equipment purchase as an expense.",
+          "There is no main statement called the statement of owner capital here."
+        ],
+        statementImpact: "Cash would fall on the balance sheet, and the cash flow statement would classify the outflow as investing.",
+        transferExample: "Buying a grinder or coffee cart trailer with cash would fit the same idea.",
+        statementNote: "The highlighted balance sheet lines are part of the movement that the cash flow statement explains.",
+        microCheck: {
+          prompt: "Was the equipment purchase an investing cash flow?",
+          choices: ["Yes", "No"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q46",
+        module: "cash_flow",
+        prompt: "BrightBean pays wages in cash. Which cash flow section fits best?",
+        choices: [
+          "Operating cash flow",
+          "Investing cash flow",
+          "Financing cash flow",
+          "No cash flow section"
+        ],
+        correctIndex: 0,
+        concepts: ["cash_flow_basics", "operating_cash_flow"],
+        statementRefs: ["income"],
+        highlightLines: ["wages_expense"],
+        whyCorrect: "Wages paid in cash are part of running the business day to day, so they fit operating cash flow.",
+        wrongWhy: [
+          "Investing usually relates to long-term assets.",
+          "Financing usually relates to owners and lenders.",
+          "Cash clearly moved here, so a cash flow section is relevant."
+        ],
+        statementImpact: "The cash flow statement would show a cash outflow from operations.",
+        transferExample: "Cash paid for utilities would usually be another operating cash flow.",
+        statementNote: "The highlighted expense line reminds you this cash payment comes from normal operations.",
+        microCheck: {
+          prompt: "Is paying wages part of normal operations?",
+          choices: ["Yes", "No"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q47",
+        module: "cash_flow",
+        prompt: "The owner invests cash into BrightBean. Which cash flow section fits best?",
+        choices: [
+          "Financing cash flow",
+          "Operating cash flow",
+          "Investing cash flow",
+          "Income statement"
+        ],
+        correctIndex: 0,
+        concepts: ["cash_flow_basics", "financing_cash_flow"],
+        statementRefs: ["balance"],
+        highlightLines: ["cash", "owner_capital"],
+        whyCorrect: "Cash from owners is a financing source because it funds the business.",
+        wrongWhy: [
+          "Operating relates to customer and operating activities, not owner funding.",
+          "Investing relates to long-term assets, not owner contributions.",
+          "The income statement is not the main place for owner investment."
+        ],
+        statementImpact: "Cash rises and owner capital rises on the balance sheet, while the cash flow statement classifies the inflow as financing.",
+        transferExample: "Cash from a bank loan also fits financing cash flow.",
+        statementNote: "These highlighted balance sheet lines explain the source of the financing cash inflow.",
+        microCheck: {
+          prompt: "Does owner cash usually count as financing?",
+          choices: ["Yes", "No"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q48",
+        module: "cash_flow",
+        prompt: "BrightBean collects cash from a customer who owed money from an earlier credit sale. Which cash flow section fits best?",
+        choices: [
+          "Operating cash flow",
+          "Investing cash flow",
+          "Financing cash flow",
+          "No cash flow section"
+        ],
+        correctIndex: 0,
+        concepts: ["cash_flow_basics", "operating_cash_flow", "accounts_receivable"],
+        statementRefs: ["balance"],
+        highlightLines: ["cash", "accounts_receivable"],
+        whyCorrect: "The cash came from normal customer operations, so it fits operating cash flow.",
+        wrongWhy: [
+          "Investing is for long-term asset activity.",
+          "Financing is for owners and lenders.",
+          "Cash clearly moved, so the cash flow statement matters."
+        ],
+        statementImpact: "Cash rises and accounts receivable falls on the balance sheet, while the cash flow statement treats it as operating.",
+        transferExample: "Collecting an office invoice two weeks later follows the same operating cash logic.",
+        statementNote: "These highlighted lines show cash collection without new revenue recognition.",
+        microCheck: {
+          prompt: "Did this customer payment come from normal operations?",
+          choices: ["Yes", "No"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q49",
+        module: "cash_flow",
+        prompt: "BrightBean takes out a new bank loan and receives cash. Which cash flow section fits best?",
+        choices: [
+          "Financing cash flow",
+          "Operating cash flow",
+          "Investing cash flow",
+          "Income statement only"
+        ],
+        correctIndex: 0,
+        concepts: ["cash_flow_basics", "financing_cash_flow"],
+        statementRefs: ["balance"],
+        highlightLines: ["cash", "long_term_loan"],
+        whyCorrect: "Borrowing cash from a lender is a financing activity.",
+        wrongWhy: [
+          "Operating relates to day-to-day customer and operating activities.",
+          "Investing relates to long-term assets, not debt funding.",
+          "The loan changes the balance sheet and cash flow statement, not just the income statement."
+        ],
+        statementImpact: "Cash rises and long-term loan rises on the balance sheet; the cash flow statement reports a financing inflow.",
+        transferExample: "Borrowing to buy a second cart would still be financing cash flow.",
+        statementNote: "These highlighted lines show where the borrowed cash came from and the obligation it created.",
+        microCheck: {
+          prompt: "Does a loan create an operating cash flow?",
+          choices: ["No", "Yes"],
+          correctIndex: 0
+        }
+      },
+      {
+        id: "q50",
+        module: "cash_flow",
+        prompt: "BrightBean reports net income of $8,000, but cash did not rise by exactly $8,000. What is the best reason to study the cash flow statement too?",
+        choices: [
+          "Profit and cash timing can differ",
+          "Net income is always wrong",
+          "Cash flow ignores operations",
+          "The balance sheet cannot show cash"
+        ],
+        correctIndex: 0,
+        concepts: ["cash_flow_basics", "operating_cash_flow"],
+        statementRefs: ["balance", "income"],
+        highlightLines: ["cash", "accounts_receivable", "net_income"],
+        whyCorrect: "Accrual accounting means revenue and expenses can be recorded before or after cash moves, so profit and cash can differ.",
+        wrongWhy: [
+          "Net income is not automatically wrong. It answers a different question from cash flow.",
+          "Cash flow does include operations.",
+          "The balance sheet does show cash, but only as an ending balance, not a full movement story."
+        ],
+        statementImpact: "The cash flow statement explains why ending cash can differ from net income.",
+        transferExample: "A credit sale can raise revenue and net income today while the cash arrives later.",
+        statementNote: "These highlighted lines show why receivables can make profit and cash move at different times.",
+        microCheck: {
+          prompt: "Can profit and cash move at different times?",
+          choices: ["Yes", "No"],
+          correctIndex: 0
+        }
+      }
+    ];
+
+    const state = loadState();
+
+    const el = {
+      welcomeScreen: document.getElementById("welcomeScreen"),
+      moduleIntroScreen: document.getElementById("moduleIntroScreen"),
+      questionScreen: document.getElementById("questionScreen"),
+      feedbackScreen: document.getElementById("feedbackScreen"),
+      moduleSummaryScreen: document.getElementById("moduleSummaryScreen"),
+      finalSummaryScreen: document.getElementById("finalSummaryScreen"),
+      startBtn: document.getElementById("startBtn"),
+      introModuleLabel: document.getElementById("introModuleLabel"),
+      introTitle: document.getElementById("introTitle"),
+      introWhy: document.getElementById("introWhy"),
+      introWatch: document.getElementById("introWatch"),
+      beginModuleBtn: document.getElementById("beginModuleBtn"),
+      questionModuleLabel: document.getElementById("questionModuleLabel"),
+      questionProgressLine: document.getElementById("questionProgressLine"),
+      questionTitle: document.getElementById("questionTitle"),
+      choiceList: document.getElementById("choiceList"),
+      viewBalanceBtn: document.getElementById("viewBalanceBtn"),
+      viewIncomeBtn: document.getElementById("viewIncomeBtn"),
+      viewExampleBtn: document.getElementById("viewExampleBtn"),
+      resultPill: document.getElementById("resultPill"),
+      feedbackTitle: document.getElementById("feedbackTitle"),
+      feedbackCorrect: document.getElementById("feedbackCorrect"),
+      feedbackWhy: document.getElementById("feedbackWhy"),
+      feedbackWrongList: document.getElementById("feedbackWrongList"),
+      feedbackStatementImpact: document.getElementById("feedbackStatementImpact"),
+      feedbackTransfer: document.getElementById("feedbackTransfer"),
+      feedbackStatementWrap: document.getElementById("feedbackStatementWrap"),
+      feedbackStatementView: document.getElementById("feedbackStatementView"),
+      feedbackStatementNote: document.getElementById("feedbackStatementNote"),
+      microPrompt: document.getElementById("microPrompt"),
+      microList: document.getElementById("microList"),
+      microHelp: document.getElementById("microHelp"),
+      continueBtn: document.getElementById("continueBtn"),
+      moduleSummaryLabel: document.getElementById("moduleSummaryLabel"),
+      moduleSummaryTitle: document.getElementById("moduleSummaryTitle"),
+      moduleSummaryCopy: document.getElementById("moduleSummaryCopy"),
+      moduleSummaryConcepts: document.getElementById("moduleSummaryConcepts"),
+      moduleSummaryNext: document.getElementById("moduleSummaryNext"),
+      moduleSummaryBtn: document.getElementById("moduleSummaryBtn"),
+      finalSummaryCopy: document.getElementById("finalSummaryCopy"),
+      finalSummaryConcepts: document.getElementById("finalSummaryConcepts"),
+      finalSummaryAccuracy: document.getElementById("finalSummaryAccuracy"),
+      restartBtn: document.getElementById("restartBtn"),
+      listenBtn: document.getElementById("listenBtn"),
+      progressBtn: document.getElementById("progressBtn"),
+      settingsBtn: document.getElementById("settingsBtn"),
+      statementOverlay: document.getElementById("statementOverlay"),
+      statementOverlayContent: document.getElementById("statementOverlayContent"),
+      progressOverlay: document.getElementById("progressOverlay"),
+      progressOverlayContent: document.getElementById("progressOverlayContent"),
+      settingsOverlay: document.getElementById("settingsOverlay"),
+      studentResetBtn: document.getElementById("studentResetBtn"),
+      teacherResetBtn: document.getElementById("teacherResetBtn")
+    };
+
+    function loadState() {
+      const baseConcepts = Object.fromEntries(Object.keys(conceptLabels).map((key) => [key, { streak: 0, mastered: false }]));
+      const baseModules = Object.fromEntries(modules.map((module, index) => [module.id, { unlocked: index === 0, completed: false, introSeen: false }]));
+      const defaults = {
+        started: false,
+        currentScreen: "welcome",
+        currentModuleId: modules[0].id,
+        currentQuestionId: null,
+        concepts: baseConcepts,
+        modules: baseModules,
+        answeredIds: [],
+        sessionAttempts: 0,
+        sessionCorrect: 0,
+        selectedAnswer: null,
+        feedbackQuestionId: null,
+        microPassed: false,
+        moduleSummaryFor: null,
+        history: []
+      };
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        if (!saved) return defaults;
+        return {
+          ...defaults,
+          ...saved,
+          concepts: { ...baseConcepts, ...(saved.concepts || {}) },
+          modules: { ...baseModules, ...(saved.modules || {}) }
+        };
+      } catch {
+        return defaults;
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function getModule(moduleId) {
+      return modules.find((module) => module.id === moduleId);
+    }
+
+    function getQuestion(questionId) {
+      return questionBank.find((question) => question.id === questionId);
+    }
+
+    function isModuleMastered(module) {
+      return module.concepts.every((concept) => state.concepts[concept]?.mastered);
+    }
+
+    function updateModuleUnlocks() {
+      modules.forEach((module, index) => {
+        state.modules[module.id].completed = isModuleMastered(module);
+        if (state.modules[module.id].completed && modules[index + 1]) {
+          state.modules[modules[index + 1].id].unlocked = true;
+        }
+      });
+    }
+
+    function masteredConceptCount(moduleId) {
+      const module = getModule(moduleId);
+      return module.concepts.filter((concept) => state.concepts[concept]?.mastered).length;
+    }
+
+    function totalMasteredConcepts() {
+      return Object.values(state.concepts).filter((entry) => entry.mastered).length;
+    }
+
+    function getQuestionsForModule(moduleId) {
+      return questionBank.filter((question) => question.module === moduleId);
+    }
+
+    function getAvailableQuestions(moduleId) {
+      const questions = getQuestionsForModule(moduleId);
+      const unmastered = questions.filter((question) => question.concepts.some((concept) => !state.concepts[concept]?.mastered));
+      const unansweredUnmastered = unmastered.filter((question) => !state.answeredIds.includes(question.id));
+      if (unansweredUnmastered.length) return unansweredUnmastered;
+      if (unmastered.length) return unmastered;
+      const remaining = questions.filter((question) => !state.answeredIds.includes(question.id));
+      return remaining.length ? remaining : questions;
+    }
+
+    function pickNextQuestion(moduleId) {
+      const pool = getAvailableQuestions(moduleId);
+      if (!pool.length) return null;
+      const ranked = pool
+        .map((question) => ({
+          question,
+          score: question.concepts.reduce((sum, concept) => sum + (state.concepts[concept]?.streak || 0), 0)
+        }))
+        .sort((a, b) => a.score - b.score);
+      return ranked[0].question;
+    }
+
+    function getCurrentUnlockedModule() {
+      const unlocked = modules.filter((module) => state.modules[module.id]?.unlocked);
+      return unlocked.find((module) => !state.modules[module.id]?.completed) || unlocked[unlocked.length - 1] || modules[0];
+    }
+
+    function setScreen(screenName) {
+      const screens = {
+        welcome: el.welcomeScreen,
+        moduleIntro: el.moduleIntroScreen,
+        question: el.questionScreen,
+        feedback: el.feedbackScreen,
+        moduleSummary: el.moduleSummaryScreen,
+        finalSummary: el.finalSummaryScreen
+      };
+      Object.entries(screens).forEach(([key, node]) => node.classList.toggle("active", key === screenName));
+      state.currentScreen = screenName;
+      saveState();
+    }
+
+    function render() {
+      updateModuleUnlocks();
+      if (!state.started) {
+        setScreen("welcome");
+        return;
+      }
+      const module = getModule(state.currentModuleId) || getCurrentUnlockedModule();
+      if (!module) {
+        renderFinalSummary();
+        return;
+      }
+      state.currentModuleId = module.id;
+      if (state.currentScreen === "moduleIntro" || !state.modules[module.id].introSeen) {
+        renderModuleIntro(module);
+        return;
+      }
+      if (state.currentScreen === "feedback" && state.feedbackQuestionId) {
+        renderFeedback(getQuestion(state.feedbackQuestionId));
+        return;
+      }
+      if (state.currentScreen === "moduleSummary" && state.moduleSummaryFor) {
+        renderModuleSummary(getModule(state.moduleSummaryFor));
+        return;
+      }
+      if (allRequiredModulesCompleted()) {
+        if (state.modules.cash_flow.unlocked && !state.modules.cash_flow.completed && state.currentModuleId === "cash_flow") {
+          ensureQuestionForModule("cash_flow");
+          renderQuestion(getQuestion(state.currentQuestionId));
+          return;
+        }
+        renderFinalSummary();
+        return;
+      }
+      ensureQuestionForModule(module.id);
+      renderQuestion(getQuestion(state.currentQuestionId));
+    }
+
+    function ensureQuestionForModule(moduleId) {
+      if (!state.currentQuestionId || getQuestion(state.currentQuestionId)?.module !== moduleId) {
+        const next = pickNextQuestion(moduleId);
+        state.currentQuestionId = next ? next.id : null;
+      }
+      if (!state.currentQuestionId && isModuleMastered(getModule(moduleId))) {
+        state.moduleSummaryFor = moduleId;
+        setScreen("moduleSummary");
+      }
+      saveState();
+    }
+
+    function renderModuleIntro(module) {
+      state.currentScreen = "moduleIntro";
+      el.introModuleLabel.textContent = module.title;
+      el.introTitle.textContent = module.introTitle;
+      el.introWhy.innerHTML = module.introWhy;
+      el.introWatch.innerHTML = module.introWatch;
+      setScreen("moduleIntro");
+    }
+
+    function renderQuestion(question) {
+      if (!question) {
+        renderModuleSummary(getModule(state.currentModuleId));
+        return;
+      }
+      const module = getModule(question.module);
+      const moduleQuestions = getQuestionsForModule(module.id);
+      const moduleIndex = Math.min(state.answeredIds.filter((id) => getQuestion(id)?.module === module.id).length + 1, moduleQuestions.length);
+      el.questionModuleLabel.textContent = module.title;
+      el.questionProgressLine.textContent = `Question ${moduleIndex} of ${moduleQuestions.length} • Concepts mastered in this module: ${masteredConceptCount(module.id)} of ${module.concepts.length}`;
+      el.questionTitle.innerHTML = question.prompt;
+      renderChoices(question);
+      renderSupportButtons(question);
+      setScreen("question");
+    }
+
+    function renderChoices(question) {
+      el.choiceList.innerHTML = "";
+      question.choices.forEach((choice, index) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "choice-btn";
+        btn.innerHTML = `<strong>${index + 1}.</strong> ${choice}`;
+        btn.addEventListener("click", () => submitAnswer(question, index));
+        el.choiceList.appendChild(btn);
+      });
+    }
+
+    function renderSupportButtons(question) {
+      const refs = new Set(question.statementRefs || []);
+      el.viewBalanceBtn.classList.toggle("hidden", !refs.has("balance"));
+      el.viewIncomeBtn.classList.toggle("hidden", !refs.has("income"));
+      el.viewExampleBtn.classList.remove("hidden");
+      el.viewBalanceBtn.onclick = () => openStatementOverlay("balance", question.highlightLines || [], question.statementNote);
+      el.viewIncomeBtn.onclick = () => openStatementOverlay("income", question.highlightLines || [], question.statementNote);
+      el.viewExampleBtn.onclick = () => {
+        openSimpleOverlay(
+          "Worked Example",
+          `<p>${question.transferExample}</p>`
+        );
+      };
+    }
+
+    function submitAnswer(question, selectedIndex) {
+      if (state.currentScreen !== "question") return;
+      state.selectedAnswer = selectedIndex;
+      state.feedbackQuestionId = question.id;
+      state.microPassed = false;
+      state.sessionAttempts += 1;
+      const correct = selectedIndex === question.correctIndex;
+      if (correct) state.sessionCorrect += 1;
+      question.concepts.forEach((concept) => {
+        if (correct) {
+          state.concepts[concept].streak = Math.min(2, (state.concepts[concept].streak || 0) + 1);
+          if (state.concepts[concept].streak >= 2) state.concepts[concept].mastered = true;
+        } else {
+          state.concepts[concept].streak = 0;
+        }
+      });
+      if (!state.answeredIds.includes(question.id)) state.answeredIds.push(question.id);
+      state.history.push({ id: question.id, correct, timestamp: Date.now(), concepts: question.concepts });
+      updateModuleUnlocks();
+      saveState();
+      renderFeedback(question);
+    }
+
+    function renderFeedback(question) {
+      const correct = state.selectedAnswer === question.correctIndex;
+      el.resultPill.className = `result-pill ${correct ? "correct" : "incorrect"}`;
+      el.resultPill.textContent = correct ? "Correct" : "Not quite";
+      el.feedbackTitle.textContent = correct ? "That answer is correct." : "That answer is not the best fit.";
+      el.feedbackCorrect.textContent = question.choices[question.correctIndex];
+      el.feedbackWhy.textContent = question.whyCorrect;
+      el.feedbackStatementImpact.textContent = question.statementImpact;
+      el.feedbackTransfer.textContent = question.transferExample;
+      el.feedbackWrongList.innerHTML = "";
+      question.choices.forEach((choice, index) => {
+        if (index === question.correctIndex) return;
+        const wrongIndex = index < question.correctIndex ? index : index - 1;
+        const li = document.createElement("li");
+        li.textContent = `"${stripHtml(choice)}" is wrong because ${question.wrongWhy[wrongIndex]}`;
+        el.feedbackWrongList.appendChild(li);
+      });
+      renderFeedbackStatement(question);
+      renderMicroCheck(question);
+      setScreen("feedback");
+    }
+
+    function renderFeedbackStatement(question) {
+      const refs = question.statementRefs || [];
+      const primary = refs[0];
+      if (!primary) {
+        el.feedbackStatementWrap.classList.add("hidden");
+        return;
+      }
+      el.feedbackStatementWrap.classList.remove("hidden");
+      el.feedbackStatementView.innerHTML = buildStatementHTML(primary, question.highlightLines || []);
+      el.feedbackStatementNote.textContent = question.statementNote || "";
+    }
+
+    function renderMicroCheck(question) {
+      el.microPrompt.textContent = question.microCheck.prompt;
+      el.microList.innerHTML = "";
+      el.microHelp.textContent = "Answer the micro check to unlock Continue.";
+      el.continueBtn.disabled = true;
+      question.microCheck.choices.forEach((choice, index) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "micro-btn";
+        btn.innerHTML = `<strong>${String.fromCharCode(65 + index)}.</strong> ${choice}`;
+        btn.addEventListener("click", () => submitMicroCheck(question, index));
+        el.microList.appendChild(btn);
+      });
+    }
+
+    function submitMicroCheck(question, index) {
+      const buttons = [...el.microList.querySelectorAll("button")];
+      if (index !== question.microCheck.correctIndex) {
+        el.microHelp.textContent = "Try again. Use the explanation and statement clue before continuing.";
+        return;
+      }
+      state.microPassed = true;
+      buttons.forEach((btn, btnIndex) => {
+        btn.disabled = true;
+        if (btnIndex === index) btn.classList.add("correct");
+      });
+      el.microHelp.textContent = "Micro check complete. Continue is now unlocked.";
+      el.continueBtn.disabled = false;
+      saveState();
+    }
+
+    function continueFromFeedback() {
+      if (!state.microPassed) return;
+      const module = getModule(state.currentModuleId);
+      if (isModuleMastered(module)) {
+        state.moduleSummaryFor = module.id;
+        state.currentQuestionId = null;
+        saveState();
+        renderModuleSummary(module);
+        return;
+      }
+      const next = pickNextQuestion(module.id);
+      state.currentQuestionId = next ? next.id : null;
+      state.selectedAnswer = null;
+      state.feedbackQuestionId = null;
+      state.microPassed = false;
+      saveState();
+      renderQuestion(getQuestion(state.currentQuestionId));
+    }
+
+    function renderModuleSummary(module) {
+      const nextModule = modules.find((item, index) => modules[index - 1]?.id === module.id);
+      el.moduleSummaryLabel.textContent = module.title;
+      el.moduleSummaryTitle.textContent = `${module.title} mastered.`;
+      el.moduleSummaryCopy.textContent = `You completed this module by mastering ${module.concepts.length} concept groups through repeated correct thinking.`;
+      el.moduleSummaryConcepts.textContent = module.concepts.map((concept) => conceptLabels[concept]).join(", ");
+      el.moduleSummaryNext.textContent = nextModule ? `Next up: ${nextModule.title}. Watch for how the new ideas connect to what you just learned.` : "You are ready for the next unlocked stage of the lab.";
+      setScreen("moduleSummary");
+    }
+
+    function continueFromModuleSummary() {
+      const finishedModule = getModule(state.moduleSummaryFor);
+      state.modules[finishedModule.id].completed = true;
+      updateModuleUnlocks();
+      const nextModule = getCurrentUnlockedModule();
+      if (!nextModule || (allRequiredModulesCompleted() && nextModule.id !== "cash_flow")) {
+        renderFinalSummary();
+        return;
+      }
+      state.currentModuleId = nextModule.id;
+      state.moduleSummaryFor = null;
+      state.modules[nextModule.id].introSeen = false;
+      state.currentQuestionId = null;
+      saveState();
+      renderModuleIntro(nextModule);
+    }
+
+    function allRequiredModulesCompleted() {
+      return modules.filter((module) => !module.optional).every((module) => state.modules[module.id]?.completed);
+    }
+
+    function renderFinalSummary() {
+      const accuracy = state.sessionAttempts ? Math.round((state.sessionCorrect / state.sessionAttempts) * 100) : 0;
+      el.finalSummaryCopy.textContent = `You worked through BrightBean one idea at a time. ${totalMasteredConcepts()} concepts are now mastered on this browser.`;
+      el.finalSummaryConcepts.textContent = Object.entries(state.concepts)
+        .filter(([, entry]) => entry.mastered)
+        .map(([concept]) => conceptLabels[concept])
+        .join(", ");
+      el.finalSummaryAccuracy.textContent = `${accuracy}% correct in this saved learning history.`;
+      setScreen("finalSummary");
+    }
+
+    function openStatementOverlay(statementKey, highlightLines, note) {
+      el.statementOverlayContent.innerHTML = `
+        ${buildStatementHTML(statementKey, highlightLines)}
+        <p>${note || ""}</p>
+      `;
+      el.statementOverlay.classList.add("open");
+    }
+
+    function openSimpleOverlay(title, html) {
+      el.statementOverlayContent.innerHTML = `<div class="overlay-head"><h2 class="overlay-title">${title}</h2></div>${html}`;
+      el.statementOverlay.classList.add("open");
+    }
+
+    function buildStatementHTML(statementKey, highlightLines) {
+      const statement = anchorStatements[statementKey];
+      const highlights = new Set(highlightLines || []);
+      const sectionsHtml = statement.sections.map((section) => `
+        ${section.title ? `<div class="statement-header">${section.title}</div>` : ""}
+        ${section.lines.map((line) => buildLineHTML(line, highlights.has(line.key), false)).join("")}
+        ${buildLineHTML(section.total, highlights.has(section.total.key), true)}
+      `).join("");
+      const closing = statement.closingTotal ? buildLineHTML(statement.closingTotal, highlights.has(statement.closingTotal.key), true) : "";
+      return `
+        <div class="statement-table">
+          <div class="statement-title">${statement.title}</div>
+          <div class="statement-subtitle">${statement.subtitle}</div>
+          ${sectionsHtml}
+          ${closing}
+        </div>
+      `;
+    }
+
+    function buildLineHTML(line, highlighted, total) {
+      return `
+        <div class="statement-line${highlighted ? " highlight" : ""}${total ? " total" : ""}">
+          <span>${line.label}</span>
+          <strong>${formatMoney(line.value)}</strong>
+        </div>
+      `;
+    }
+
+    function formatMoney(value) {
+      return Number(value).toLocaleString("en-US");
+    }
+
+    function renderProgressOverlay() {
+      const overallPercent = Math.round((totalMasteredConcepts() / Object.keys(conceptLabels).length) * 100);
+      el.progressOverlayContent.innerHTML = `
+        <div class="module-progress">
+          <h3>Overall Progress</h3>
+          <p>${totalMasteredConcepts()} of ${Object.keys(conceptLabels).length} concepts mastered</p>
+          <div class="progress-track"><div class="progress-fill" style="width:${overallPercent}%"></div></div>
+        </div>
+      `;
+      modules.forEach((module) => {
+        const mastered = masteredConceptCount(module.id);
+        const percent = Math.round((mastered / module.concepts.length) * 100);
+        const wrap = document.createElement("section");
+        wrap.className = "module-progress";
+        wrap.innerHTML = `
+          <h3>${module.title}</h3>
+          <p>${state.modules[module.id].completed ? "Mastered" : state.modules[module.id].unlocked ? "Unlocked" : "Locked"}</p>
+          <div class="progress-track"><div class="progress-fill" style="width:${percent}%"></div></div>
+          <div class="concept-list"></div>
+        `;
+        const list = wrap.querySelector(".concept-list");
+        module.concepts.forEach((concept) => {
+          const row = document.createElement("div");
+          row.className = "concept-row";
+          const entry = state.concepts[concept];
+          row.innerHTML = `<span>${conceptLabels[concept]}</span><strong>${entry.mastered ? "Mastered" : `Streak ${entry.streak}/2`}</strong>`;
+          list.appendChild(row);
+        });
+        el.progressOverlayContent.appendChild(wrap);
+      });
+    }
+
+    function readCurrentScreen() {
+      const parts = [];
+      if (state.currentScreen === "welcome") {
+        parts.push("Accounting Mastery Lab. This is an interactive accounting learning lab.");
+      } else if (state.currentScreen === "moduleIntro") {
+        parts.push(el.introModuleLabel.textContent, stripHtml(el.introTitle.textContent), stripHtml(el.introWhy.innerHTML), stripHtml(el.introWatch.innerHTML));
+      } else if (state.currentScreen === "question") {
+        const question = getQuestion(state.currentQuestionId);
+        parts.push(el.questionModuleLabel.textContent, stripHtml(question.prompt));
+        question.choices.forEach((choice, index) => parts.push(`Choice ${index + 1}. ${stripHtml(choice)}.`));
+      } else if (state.currentScreen === "feedback") {
+        parts.push(el.feedbackTitle.textContent, el.feedbackCorrect.textContent, el.feedbackWhy.textContent, el.feedbackStatementImpact.textContent, el.feedbackTransfer.textContent, el.microPrompt.textContent);
+      } else if (state.currentScreen === "moduleSummary") {
+        parts.push(el.moduleSummaryTitle.textContent, el.moduleSummaryCopy.textContent);
+      } else {
+        parts.push(el.finalSummaryCopy.textContent, el.finalSummaryAccuracy.textContent);
+      }
+      const utterance = new SpeechSynthesisUtterance(parts.join(" "));
+      utterance.rate = 0.96;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utterance);
+    }
+
+    function stripHtml(value) {
+      const div = document.createElement("div");
+      div.innerHTML = value;
+      return div.textContent || "";
+    }
+
+    function resetProgress(confirmText) {
+      if (!window.confirm(confirmText)) return;
+      speechSynthesis.cancel();
+      localStorage.removeItem(STORAGE_KEY);
+      Object.assign(state, loadState());
+      render();
+    }
+
+    function startLearning() {
+      state.started = true;
+      const module = getCurrentUnlockedModule();
+      state.currentModuleId = module.id;
+      state.modules[module.id].introSeen = false;
+      saveState();
+      renderModuleIntro(module);
+    }
+
+    function beginModule() {
+      const module = getModule(state.currentModuleId);
+      state.modules[module.id].introSeen = true;
+      const nextQuestion = pickNextQuestion(module.id);
+      state.currentQuestionId = nextQuestion ? nextQuestion.id : null;
+      saveState();
+      renderQuestion(getQuestion(state.currentQuestionId));
+    }
+
+    function closeOverlay(id) {
+      document.getElementById(id).classList.remove("open");
+    }
+
+    function handleKeyboard(event) {
+      if (state.currentScreen === "question" && ["1", "2", "3", "4"].includes(event.key)) {
+        const question = getQuestion(state.currentQuestionId);
+        if (question) submitAnswer(question, Number(event.key) - 1);
+      }
+      if (state.currentScreen === "feedback") {
+        const question = getQuestion(state.feedbackQuestionId);
+        if (question) {
+          const index = ["a", "b", "c"].indexOf(event.key.toLowerCase());
+          if (index >= 0 && index < question.microCheck.choices.length) submitMicroCheck(question, index);
+          if (state.microPassed && event.key === "Enter") continueFromFeedback();
+        }
+      }
+      if (event.key === "Escape") {
+        el.statementOverlay.classList.remove("open");
+        el.progressOverlay.classList.remove("open");
+        el.settingsOverlay.classList.remove("open");
+      }
+    }
+
+    el.startBtn.addEventListener("click", startLearning);
+    el.beginModuleBtn.addEventListener("click", beginModule);
+    el.continueBtn.addEventListener("click", continueFromFeedback);
+    el.moduleSummaryBtn.addEventListener("click", continueFromModuleSummary);
+    el.restartBtn.addEventListener("click", () => resetProgress("Reset all saved progress and start over?"));
+    el.listenBtn.addEventListener("click", readCurrentScreen);
+    el.progressBtn.addEventListener("click", () => {
+      renderProgressOverlay();
+      el.progressOverlay.classList.add("open");
+    });
+    el.settingsBtn.addEventListener("click", () => el.settingsOverlay.classList.add("open"));
+    el.studentResetBtn.addEventListener("click", () => resetProgress("Reset your saved progress on this browser?"));
+    el.teacherResetBtn.addEventListener("click", () => resetProgress("Teacher reset: clear all saved progress on this browser?"));
+    document.querySelectorAll("[data-close]").forEach((btn) => {
+      btn.addEventListener("click", () => closeOverlay(btn.dataset.close));
+    });
+    [el.statementOverlay, el.progressOverlay, el.settingsOverlay].forEach((overlay) => {
+      overlay.addEventListener("click", (event) => {
+        if (event.target === overlay) overlay.classList.remove("open");
+      });
+    });
+    document.addEventListener("keydown", handleKeyboard);
+
+    render();
+  </script>
+</body>
+</html>
